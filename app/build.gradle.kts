@@ -5,12 +5,16 @@ plugins {
 
 android {
     namespace = "com.example.snutiexp"
-    compileSdk = 34
+    compileSdk = 36
+
+    buildFeatures {
+        viewBinding = true
+    }
 
     defaultConfig {
         applicationId = "com.example.snutiexp"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
