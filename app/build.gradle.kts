@@ -40,6 +40,10 @@ android {
 }
 
 dependencies {
+    // 서버 통신을 위한 Retrofit 라이브러리
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0") // JSON 데이터를 코틀린 객체로 변환
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // 통신 로그 확인용 (디버깅 꿀템)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
