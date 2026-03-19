@@ -80,6 +80,9 @@
             android:layout_height="48dp"
             android:background="@android:drawable/editbox_background"
             android:hint="Password"
+            
+            android:gravity="center_vertical"
+
             android:inputType="textPassword"
             android:paddingHorizontal="12dp"
             android:textSize="14sp" />
@@ -174,7 +177,7 @@
         android:id="@+id/btn_go_signup"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="28dp"
         android:backgroundTint="#E0E0E0"
         android:text="회원가입"
         style="@style/BodyText"
