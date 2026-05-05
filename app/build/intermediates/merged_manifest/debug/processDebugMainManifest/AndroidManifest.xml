@@ -8,6 +8,15 @@
         android:minSdkVersion="24"
         android:targetSdkVersion="36" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 안드로이드 12 이하용 -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- 안드로이드 13 이상용 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <permission
         android:name="com.example.snutiexp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
@@ -26,15 +35,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="true"
-        android:theme="@style/Theme.SNUTIExP" >
+        android:theme="@style/Theme.SNUTIExP"
+        android:usesCleartextTraffic="true" >
         <activity
             android:name="com.example.snutiexp.main.AddCourseActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustNothing" >
+        </activity>
         <activity
             android:name="com.example.snutiexp.main.MainActivity"
-            android:exported="true" >
-
-            <!-- 임시 코드 -->
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.example.snutiexp.login.LoginActivity"
+            android:exported="true"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,20 +58,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.snutiexp.login.LoginActivity"
-            android:exported="true"
-            android:launchMode="singleTop" >
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
+            android:name="com.example.snutiexp.signup.SignupActivity"
+            android:exported="false" >
         </activity>
         <activity
-            android:name="com.example.snutiexp.signup.SignupActivity"
-            android:exported="true" />
+            android:name="com.example.snutiexp.main.SettingsActivity"
+            android:exported="false" >
+        </activity>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

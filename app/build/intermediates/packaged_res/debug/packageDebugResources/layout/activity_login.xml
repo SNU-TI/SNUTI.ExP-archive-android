@@ -80,6 +80,9 @@
             android:layout_height="48dp"
             android:background="@android:drawable/editbox_background"
             android:hint="Password"
+            
+            android:gravity="center_vertical"
+
             android:inputType="textPassword"
             android:paddingHorizontal="12dp"
             android:textSize="14sp" />
@@ -106,7 +109,7 @@
         android:padding="4dp"/>
 
 <!--    login-->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
         android:layout_width="0dp"
         android:layout_height="56dp"
@@ -115,7 +118,7 @@
         android:text="로그인"
         android:textColor="@color/white"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:cornerRadius="12dp"  app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_find_password" />
 
@@ -174,7 +177,7 @@
         android:id="@+id/btn_go_signup"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="28dp"
         android:backgroundTint="#E0E0E0"
         android:text="회원가입"
         style="@style/BodyText"

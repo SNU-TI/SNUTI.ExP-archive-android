@@ -4,7 +4,10 @@ package com.example.snutiexp.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,26 +28,44 @@ public final class ActivityMainBinding implements ViewBinding {
   public final ImageButton btnAdd;
 
   @NonNull
-  public final ImageButton btnSearch;
+  public final ImageView btnAddTag;
 
   @NonNull
-  public final ConstraintLayout main;
+  public final ImageButton btnProfile;
 
   @NonNull
-  public final FragmentContainerView navHostFragment;
+  public final EditText etSearch;
 
   @NonNull
-  public final TextView tvTitle;
+  public final LinearLayout layoutSearchGroup;
+
+  @NonNull
+  public final LinearLayout layoutTagArea;
+
+  @NonNull
+  public final FragmentContainerView mainContainer;
+
+  @NonNull
+  public final View searchDivider;
+
+  @NonNull
+  public final TextView tvMainTitle;
 
   private ActivityMainBinding(@NonNull ConstraintLayout rootView, @NonNull ImageButton btnAdd,
-      @NonNull ImageButton btnSearch, @NonNull ConstraintLayout main,
-      @NonNull FragmentContainerView navHostFragment, @NonNull TextView tvTitle) {
+      @NonNull ImageView btnAddTag, @NonNull ImageButton btnProfile, @NonNull EditText etSearch,
+      @NonNull LinearLayout layoutSearchGroup, @NonNull LinearLayout layoutTagArea,
+      @NonNull FragmentContainerView mainContainer, @NonNull View searchDivider,
+      @NonNull TextView tvMainTitle) {
     this.rootView = rootView;
     this.btnAdd = btnAdd;
-    this.btnSearch = btnSearch;
-    this.main = main;
-    this.navHostFragment = navHostFragment;
-    this.tvTitle = tvTitle;
+    this.btnAddTag = btnAddTag;
+    this.btnProfile = btnProfile;
+    this.etSearch = etSearch;
+    this.layoutSearchGroup = layoutSearchGroup;
+    this.layoutTagArea = layoutTagArea;
+    this.mainContainer = mainContainer;
+    this.searchDivider = searchDivider;
+    this.tvMainTitle = tvMainTitle;
   }
 
   @Override
@@ -80,28 +101,56 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.btn_search;
-      ImageButton btnSearch = ViewBindings.findChildViewById(rootView, id);
-      if (btnSearch == null) {
+      id = R.id.btn_add_tag;
+      ImageView btnAddTag = ViewBindings.findChildViewById(rootView, id);
+      if (btnAddTag == null) {
         break missingId;
       }
 
-      ConstraintLayout main = (ConstraintLayout) rootView;
-
-      id = R.id.nav_host_fragment;
-      FragmentContainerView navHostFragment = ViewBindings.findChildViewById(rootView, id);
-      if (navHostFragment == null) {
+      id = R.id.btn_profile;
+      ImageButton btnProfile = ViewBindings.findChildViewById(rootView, id);
+      if (btnProfile == null) {
         break missingId;
       }
 
-      id = R.id.tv_title;
-      TextView tvTitle = ViewBindings.findChildViewById(rootView, id);
-      if (tvTitle == null) {
+      id = R.id.et_search;
+      EditText etSearch = ViewBindings.findChildViewById(rootView, id);
+      if (etSearch == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((ConstraintLayout) rootView, btnAdd, btnSearch, main,
-          navHostFragment, tvTitle);
+      id = R.id.layout_search_group;
+      LinearLayout layoutSearchGroup = ViewBindings.findChildViewById(rootView, id);
+      if (layoutSearchGroup == null) {
+        break missingId;
+      }
+
+      id = R.id.layout_tag_area;
+      LinearLayout layoutTagArea = ViewBindings.findChildViewById(rootView, id);
+      if (layoutTagArea == null) {
+        break missingId;
+      }
+
+      id = R.id.main_container;
+      FragmentContainerView mainContainer = ViewBindings.findChildViewById(rootView, id);
+      if (mainContainer == null) {
+        break missingId;
+      }
+
+      id = R.id.search_divider;
+      View searchDivider = ViewBindings.findChildViewById(rootView, id);
+      if (searchDivider == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_main_title;
+      TextView tvMainTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvMainTitle == null) {
+        break missingId;
+      }
+
+      return new ActivityMainBinding((ConstraintLayout) rootView, btnAdd, btnAddTag, btnProfile,
+          etSearch, layoutSearchGroup, layoutTagArea, mainContainer, searchDivider, tvMainTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -1,126 +1,210 @@
 [
     {
-        "merged": "com.example.snutiexp.app-debug-48:/layout_activity_main.xml.flat",
-        "source": "com.example.snutiexp.app-main-50:/layout/activity_main.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_activity_signup.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\activity_signup.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\xml_data_extraction_rules.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\xml\\data_extraction_rules.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_blue_circle.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_blue_circle.xml"
     },
     {
-        "merged": "com.example.snutiexp.app-debug-48:/drawable_ic_google.xml.flat",
-        "source": "com.example.snutiexp.app-main-50:/drawable/ic_google.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\navigation_main_nav_graph.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\navigation\\main_nav_graph.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\navigation_main_nav_graph.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\navigation\\main_nav_graph.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_diamond_blue.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_diamond_blue.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\layout_activity_main.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\layout\\activity_main.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_activity_login.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\activity_login.xml"
     },
     {
-        "merged": "com.example.snutiexp.app-debug-48:/layout_activity_add_course.xml.flat",
-        "source": "com.example.snutiexp.app-main-50:/layout/activity_add_course.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xxxhdpi\\ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\layout_activity_login.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\layout\\activity_login.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\xml\\data_extraction_rules.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-mdpi\\ic_launcher_round.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_search.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_search.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xxxhdpi\\ic_launcher.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_google.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_google.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\drawable_bg_white_circle.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\drawable\\bg_white_circle.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
     },
     {
-        "merged": "com.example.snutiexp.app-debug-48:/layout_activity_login.xml.flat",
-        "source": "com.example.snutiexp.app-main-50:/layout/activity_login.xml"
+        "merged": "com.example.snutiexp.app-debug-49:/layout_activity_settings.xml.flat",
+        "source": "com.example.snutiexp.app-main-51:/layout/activity_settings.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\drawable_ic_btn_search.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\drawable\\ic_btn_search.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xhdpi\\ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-anydpi-v26\\ic_launcher.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-hdpi\\ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_fragment_settings.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\fragment_settings.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\drawable\\ic_launcher_foreground.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_item_edit_section.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\item_edit_section.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\layout_activity_signup.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\layout\\activity_signup.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_tag_container.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_tag_container.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-hdpi\\ic_launcher_round.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_launcher_background.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\navigation_signup_nav_graph.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\navigation\\signup_nav_graph.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_tag_item.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_tag_item.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xhdpi\\ic_launcher.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-mdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-mdpi\\ic_launcher.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_apple.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_apple.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\xml_backup_rules.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\xml\\backup_rules.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_search_group.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_search_group.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\layout_fragment_main_list.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\layout\\fragment_main_list.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xhdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-hdpi\\ic_launcher.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_mic.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_mic.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xhdpi\\ic_launcher_round.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_inner_search_bar.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_inner_search_bar.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xxhdpi\\ic_launcher.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_activity_add_course.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\activity_add_course.xml"
     },
     {
-        "merged": "com.example.snutiexp.app-debug-48:/drawable_ic_apple.xml.flat",
-        "source": "com.example.snutiexp.app-main-50:/drawable/ic_apple.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_check_white.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_check_white.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-mdpi\\ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\drawable_ic_launcher_background.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\drawable\\ic_launcher_background.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_check_blue.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_check_blue.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\drawable_ic_btn_add.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\drawable\\ic_btn_add.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_white_round_stroke.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_white_round_stroke.xml"
     },
     {
-        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-48:\\layout_activity_add_course.xml.flat",
-        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-50:\\layout\\activity_add_course.xml"
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_btn_add.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_btn_add.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_fragment_document_edit.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\fragment_document_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_delete_red.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_delete_red.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_bottom_line.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_bottom_line.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_profile.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_profile.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_circle_black.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_circle_black.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_white_circle.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_white_circle.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_diamond_black.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_diamond_black.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_circle_blue.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_circle_blue.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\navigation_signup_nav_graph.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\navigation\\signup_nav_graph.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_ic_back.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\ic_back.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_fragment_info_input.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\fragment_info_input.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\drawable_bg_setting_card.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\drawable\\bg_setting_card.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_item_lecture.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\item_lecture.xml"
+    },
+    {
+        "merged": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-debug-49:\\layout_fragment_main_list.xml.flat",
+        "source": "C:\\Users\\limit\\.gradle\\daemon\\8.11.1\\com.example.snutiexp.app-main-51:\\layout\\fragment_main_list.xml"
     }
 ]

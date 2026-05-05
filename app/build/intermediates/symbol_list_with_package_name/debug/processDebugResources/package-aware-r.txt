@@ -139,6 +139,8 @@ attr alertDialogButtonGroupStyle
 attr alertDialogCenterButtons
 attr alertDialogStyle
 attr alertDialogTheme
+attr alignContent
+attr alignItems
 attr allowStacking
 attr alpha
 attr alphabeticModifiers
@@ -513,6 +515,9 @@ attr dialogTheme
 attr displayOptions
 attr divider
 attr dividerColor
+attr dividerDrawable
+attr dividerDrawableHorizontal
+attr dividerDrawableVertical
 attr dividerHorizontal
 attr dividerInsetEnd
 attr dividerInsetStart
@@ -627,6 +632,8 @@ attr fastScrollVerticalTrackDrawable
 attr finishPrimaryWithSecondary
 attr finishSecondaryWithPrimary
 attr firstBaselineToTopHeight
+attr flexDirection
+attr flexWrap
 attr floatingActionButtonLargePrimaryStyle
 attr floatingActionButtonLargeSecondaryStyle
 attr floatingActionButtonLargeStyle
@@ -791,6 +798,7 @@ attr itemTextAppearanceActiveBoldEnabled
 attr itemTextAppearanceInactive
 attr itemTextColor
 attr itemVerticalPadding
+attr justifyContent
 attr keyPositionType
 attr keyboardIcon
 attr keylines
@@ -809,6 +817,7 @@ attr layout
 attr layoutDescription
 attr layoutDuringTransition
 attr layoutManager
+attr layout_alignSelf
 attr layout_anchor
 attr layout_anchorGravity
 attr layout_behavior
@@ -863,6 +872,9 @@ attr layout_constraintWidth_percent
 attr layout_dodgeInsetEdges
 attr layout_editor_absoluteX
 attr layout_editor_absoluteY
+attr layout_flexBasisPercent
+attr layout_flexGrow
+attr layout_flexShrink
 attr layout_goneMarginBaseline
 attr layout_goneMarginBottom
 attr layout_goneMarginEnd
@@ -873,10 +885,16 @@ attr layout_goneMarginTop
 attr layout_insetEdge
 attr layout_keyline
 attr layout_marginBaseline
+attr layout_maxHeight
+attr layout_maxWidth
+attr layout_minHeight
+attr layout_minWidth
 attr layout_optimizationLevel
+attr layout_order
 attr layout_scrollEffect
 attr layout_scrollFlags
 attr layout_scrollInterpolator
+attr layout_wrapBefore
 attr layout_wrapBehaviorInParent
 attr liftOnScroll
 attr liftOnScrollColor
@@ -972,6 +990,7 @@ attr maxButtonHeight
 attr maxCharacterCount
 attr maxHeight
 attr maxImageSize
+attr maxLine
 attr maxLines
 attr maxNumber
 attr maxVelocity
@@ -1192,6 +1211,9 @@ attr shouldRemoveExpandedCorners
 attr showAnimationBehavior
 attr showAsAction
 attr showDelay
+attr showDivider
+attr showDividerHorizontal
+attr showDividerVertical
 attr showDividers
 attr showMarker
 attr showMotionSpec
@@ -1562,6 +1584,7 @@ color background_floating_material_light
 color background_material_dark
 color background_material_light
 color black
+color blue_main
 color bright_foreground_disabled_material_dark
 color bright_foreground_disabled_material_light
 color bright_foreground_inverse_material_dark
@@ -3587,7 +3610,15 @@ drawable abc_textfield_search_material
 drawable abc_vector_test
 drawable avd_hide_password
 drawable avd_show_password
+drawable bg_blue_circle
+drawable bg_bottom_line
+drawable bg_inner_search_bar
+drawable bg_search_group
+drawable bg_setting_card
+drawable bg_tag_container
+drawable bg_tag_item
 drawable bg_white_circle
+drawable bg_white_round_stroke
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
@@ -3603,16 +3634,22 @@ drawable design_password_eye
 drawable design_snackbar_background
 drawable ic_apple
 drawable ic_arrow_back_black_24
+drawable ic_back
 drawable ic_btn_add
-drawable ic_btn_search
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
 drawable ic_call_answer_video_low
 drawable ic_call_decline
 drawable ic_call_decline_low
+drawable ic_check_white
+drawable ic_circle_black
+drawable ic_circle_blue
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
+drawable ic_delete_red
+drawable ic_diamond_black
+drawable ic_diamond_blue
 drawable ic_expand_less_22px
 drawable ic_expand_more_22px
 drawable ic_google
@@ -3622,11 +3659,14 @@ drawable ic_launcher_foreground
 drawable ic_m3_chip_check
 drawable ic_m3_chip_checked_circle
 drawable ic_m3_chip_close
+drawable ic_mic
 drawable ic_mtrl_arrow_circle
 drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
+drawable ic_profile
+drawable ic_search
 drawable ic_search_black_24
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3810,13 +3850,25 @@ id bounce
 id bounceBoth
 id bounceEnd
 id bounceStart
+id btnChangePassword
+id btnDeleteAccount
+id btnLogout
 id btn_add
+id btn_add_image_activity
+id btn_add_tag
+id btn_add_text_activity
 id btn_apple
+id btn_back
+id btn_back_to_login
+id btn_delete_section
+id btn_done
 id btn_go_signup
 id btn_google
 id btn_login
-id btn_save
-id btn_search
+id btn_profile
+id btn_signup_submit
+id btn_switch_edit
+id btn_switch_info
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3840,6 +3892,8 @@ id clip_vertical
 id clockwise
 id closest
 id collapseActionView
+id column
+id column_reverse
 id compress
 id confirm_button
 id constraint
@@ -3851,6 +3905,7 @@ id continuousVelocity
 id coordinator
 id cos
 id counterclockwise
+id course_frame_container
 id cradle
 id currentState
 id custom
@@ -3876,6 +3931,7 @@ id disableIntraAutoTransition
 id disablePostScroll
 id disableScroll
 id disjoint
+id dividerHeader
 id dragAnticlockwise
 id dragClockwise
 id dragDown
@@ -3900,10 +3956,20 @@ id enterAlways
 id enterAlwaysCollapsed
 id entireSpace
 id escape
-id et_course_name
+id et_date
+id et_location
 id et_login_id
 id et_login_pw
-id et_professor_name
+id et_search
+id et_section_content
+id et_signup_email
+id et_signup_pw
+id et_signup_pw_confirm
+id et_speaker
+id et_subject
+id et_summary
+id et_tag_input
+id et_title
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
@@ -3918,6 +3984,9 @@ id fitStart
 id fitToContents
 id fitXY
 id fixed
+id flex_end
+id flex_start
+id flexbox_tags
 id flip
 id floating
 id forever
@@ -3929,6 +3998,8 @@ id ghost_view_holder
 id gone
 id graph
 id graph_wrap
+id groupAccount
+id groupPassword
 id group_divider
 id grouping
 id groups
@@ -3955,10 +4026,20 @@ id invisible
 id inward
 id italic
 id item_touch_helper_previous_elevation
+id iv_edit_icon
+id iv_info_icon
+id iv_section_image
 id jumpToEnd
 id jumpToStart
 id labeled
 id layout
+id layout_bottom_buttons
+id layout_bottom_switcher
+id layout_inputs
+id layout_search_group
+id layout_section_add_buttons
+id layout_tag_area
+id layout_tag_input
 id left
 id leftToRight
 id legacy
@@ -3967,11 +4048,14 @@ id line3
 id linear
 id listMode
 id list_item
+id loading_overlay
+id loading_progress
 id locale
 id ltr
 id m3_side_sheet
 id main
 id mainListFragment
+id main_container
 id main_nav_graph
 id marquee
 id masked
@@ -4032,7 +4116,6 @@ id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
 id nav_controller_view_tag
-id nav_host_fragment
 id nav_host_fragment_container
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_content_container
@@ -4055,6 +4138,7 @@ id north
 id notification_background
 id notification_main_column
 id notification_main_column_container
+id nowrap
 id off
 id on
 id onInterceptTouchReturnSwipe
@@ -4106,8 +4190,12 @@ id rightToLeft
 id right_icon
 id right_side
 id rounded
+id row
 id row_index_key
+id row_reverse
 id rtl
+id rv_lectures
+id rv_sections
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -4122,6 +4210,7 @@ id search_badge
 id search_bar
 id search_button
 id search_close_btn
+id search_divider
 id search_edit_frame
 id search_go_btn
 id search_mag_icon
@@ -4149,6 +4238,9 @@ id snackbar_text
 id snap
 id snapMargins
 id south
+id space_around
+id space_between
+id space_evenly
 id spacer
 id special_effects_controller_view_tag
 id spline
@@ -4206,6 +4298,8 @@ id textinput_placeholder
 id textinput_prefix_text
 id textinput_suffix_text
 id til_login_pw
+id til_signup_pw
+id til_signup_pw_confirm
 id time
 id title
 id titleDividerNoCustom
@@ -4227,12 +4321,20 @@ id transition_scene_layoutid_cache
 id transition_transform
 id triangle
 id tv_add_title
+id tv_edit_label
 id tv_find_password
+id tv_info_label
 id tv_label_email
 id tv_label_pw
+id tv_label_pw_confirm
+id tv_lecture_date
+id tv_lecture_info
+id tv_lecture_title
 id tv_login_title
+id tv_main_title
 id tv_or
-id tv_title
+id tv_section_number
+id tv_signup_title
 id unchecked
 id uniform
 id unlabeled
@@ -4256,6 +4358,7 @@ id withinBounds
 id wrap
 id wrap_content
 id wrap_content_constrained
+id wrap_reverse
 id x_left
 id x_right
 integer abc_config_activityDefaultDur
@@ -4379,6 +4482,7 @@ layout abc_tooltip
 layout activity_add_course
 layout activity_login
 layout activity_main
+layout activity_settings
 layout activity_signup
 layout custom_dialog
 layout design_bottom_navigation_item
@@ -4396,9 +4500,13 @@ layout design_navigation_menu
 layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
+layout fragment_document_edit
+layout fragment_info_input
 layout fragment_main_list
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
+layout item_edit_section
+layout item_lecture
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -5937,6 +6045,8 @@ styleable DrawerArrowToggle arrowHeadLength arrowShaftLength barLength color dra
 styleable DrawerLayout elevation
 styleable ExtendedFloatingActionButton collapsedSize elevation extendMotionSpec extendStrategy hideMotionSpec showMotionSpec shrinkMotionSpec
 styleable ExtendedFloatingActionButton_Behavior_Layout behavior_autoHide behavior_autoShrink
+styleable FlexboxLayout alignContent alignItems dividerDrawable dividerDrawableHorizontal dividerDrawableVertical flexDirection flexWrap justifyContent maxLine showDivider showDividerHorizontal showDividerVertical
+styleable FlexboxLayout_Layout layout_alignSelf layout_flexBasisPercent layout_flexGrow layout_flexShrink layout_maxHeight layout_maxWidth layout_minHeight layout_minWidth layout_order layout_wrapBefore
 styleable FloatingActionButton android_enabled backgroundTint backgroundTintMode borderWidth elevation ensureMinTouchTargetSize fabCustomSize fabSize hideMotionSpec hoveredFocusedTranslationZ maxImageSize pressedTranslationZ rippleColor shapeAppearance shapeAppearanceOverlay showMotionSpec useCompatPadding
 styleable FloatingActionButton_Behavior_Layout behavior_autoHide
 styleable FloatingToolbar backgroundTint marginBottomSystemWindowInsets marginLeftSystemWindowInsets marginRightSystemWindowInsets marginTopSystemWindowInsets

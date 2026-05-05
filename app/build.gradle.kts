@@ -40,6 +40,9 @@ android {
 }
 
 dependencies {
+    // FlexboxLayout 라이브러리 추가 (태그 줄바꿈용)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+
     // 서버 통신을 위한 Retrofit 라이브러리
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0") // JSON 데이터를 코틀린 객체로 변환

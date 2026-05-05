@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
+    <color name="blue_main">#4A89FF</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_name">SNUTI ExP</string>
     <string name="btn_add_desc">강좌 추가 버튼</string>

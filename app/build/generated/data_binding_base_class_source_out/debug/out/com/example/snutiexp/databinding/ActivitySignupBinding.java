@@ -4,20 +4,77 @@ package com.example.snutiexp.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
+import androidx.viewbinding.ViewBindings;
 import com.example.snutiexp.R;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import java.lang.NullPointerException;
 import java.lang.Override;
+import java.lang.String;
 
 public final class ActivitySignupBinding implements ViewBinding {
   @NonNull
   private final ConstraintLayout rootView;
 
-  private ActivitySignupBinding(@NonNull ConstraintLayout rootView) {
+  @NonNull
+  public final MaterialButton btnBackToLogin;
+
+  @NonNull
+  public final MaterialButton btnSignupSubmit;
+
+  @NonNull
+  public final EditText etSignupEmail;
+
+  @NonNull
+  public final TextInputEditText etSignupPw;
+
+  @NonNull
+  public final TextInputEditText etSignupPwConfirm;
+
+  @NonNull
+  public final TextInputLayout tilSignupPw;
+
+  @NonNull
+  public final TextInputLayout tilSignupPwConfirm;
+
+  @NonNull
+  public final TextView tvLabelEmail;
+
+  @NonNull
+  public final TextView tvLabelPw;
+
+  @NonNull
+  public final TextView tvLabelPwConfirm;
+
+  @NonNull
+  public final TextView tvSignupTitle;
+
+  private ActivitySignupBinding(@NonNull ConstraintLayout rootView,
+      @NonNull MaterialButton btnBackToLogin, @NonNull MaterialButton btnSignupSubmit,
+      @NonNull EditText etSignupEmail, @NonNull TextInputEditText etSignupPw,
+      @NonNull TextInputEditText etSignupPwConfirm, @NonNull TextInputLayout tilSignupPw,
+      @NonNull TextInputLayout tilSignupPwConfirm, @NonNull TextView tvLabelEmail,
+      @NonNull TextView tvLabelPw, @NonNull TextView tvLabelPwConfirm,
+      @NonNull TextView tvSignupTitle) {
     this.rootView = rootView;
+    this.btnBackToLogin = btnBackToLogin;
+    this.btnSignupSubmit = btnSignupSubmit;
+    this.etSignupEmail = etSignupEmail;
+    this.etSignupPw = etSignupPw;
+    this.etSignupPwConfirm = etSignupPwConfirm;
+    this.tilSignupPw = tilSignupPw;
+    this.tilSignupPwConfirm = tilSignupPwConfirm;
+    this.tvLabelEmail = tvLabelEmail;
+    this.tvLabelPw = tvLabelPw;
+    this.tvLabelPwConfirm = tvLabelPwConfirm;
+    this.tvSignupTitle = tvSignupTitle;
   }
 
   @Override
@@ -43,10 +100,81 @@ public final class ActivitySignupBinding implements ViewBinding {
 
   @NonNull
   public static ActivitySignupBinding bind(@NonNull View rootView) {
-    if (rootView == null) {
-      throw new NullPointerException("rootView");
-    }
+    // The body of this method is generated in a way you would not otherwise write.
+    // This is done to optimize the compiled bytecode for size and performance.
+    int id;
+    missingId: {
+      id = R.id.btn_back_to_login;
+      MaterialButton btnBackToLogin = ViewBindings.findChildViewById(rootView, id);
+      if (btnBackToLogin == null) {
+        break missingId;
+      }
 
-    return new ActivitySignupBinding((ConstraintLayout) rootView);
+      id = R.id.btn_signup_submit;
+      MaterialButton btnSignupSubmit = ViewBindings.findChildViewById(rootView, id);
+      if (btnSignupSubmit == null) {
+        break missingId;
+      }
+
+      id = R.id.et_signup_email;
+      EditText etSignupEmail = ViewBindings.findChildViewById(rootView, id);
+      if (etSignupEmail == null) {
+        break missingId;
+      }
+
+      id = R.id.et_signup_pw;
+      TextInputEditText etSignupPw = ViewBindings.findChildViewById(rootView, id);
+      if (etSignupPw == null) {
+        break missingId;
+      }
+
+      id = R.id.et_signup_pw_confirm;
+      TextInputEditText etSignupPwConfirm = ViewBindings.findChildViewById(rootView, id);
+      if (etSignupPwConfirm == null) {
+        break missingId;
+      }
+
+      id = R.id.til_signup_pw;
+      TextInputLayout tilSignupPw = ViewBindings.findChildViewById(rootView, id);
+      if (tilSignupPw == null) {
+        break missingId;
+      }
+
+      id = R.id.til_signup_pw_confirm;
+      TextInputLayout tilSignupPwConfirm = ViewBindings.findChildViewById(rootView, id);
+      if (tilSignupPwConfirm == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_label_email;
+      TextView tvLabelEmail = ViewBindings.findChildViewById(rootView, id);
+      if (tvLabelEmail == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_label_pw;
+      TextView tvLabelPw = ViewBindings.findChildViewById(rootView, id);
+      if (tvLabelPw == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_label_pw_confirm;
+      TextView tvLabelPwConfirm = ViewBindings.findChildViewById(rootView, id);
+      if (tvLabelPwConfirm == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_signup_title;
+      TextView tvSignupTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvSignupTitle == null) {
+        break missingId;
+      }
+
+      return new ActivitySignupBinding((ConstraintLayout) rootView, btnBackToLogin, btnSignupSubmit,
+          etSignupEmail, etSignupPw, etSignupPwConfirm, tilSignupPw, tilSignupPwConfirm,
+          tvLabelEmail, tvLabelPw, tvLabelPwConfirm, tvSignupTitle);
+    }
+    String missingId = rootView.getResources().getResourceName(id);
+    throw new NullPointerException("Missing required view with ID: ".concat(missingId));
   }
 }

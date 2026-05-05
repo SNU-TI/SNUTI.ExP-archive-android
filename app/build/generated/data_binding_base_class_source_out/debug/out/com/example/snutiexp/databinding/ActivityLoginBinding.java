@@ -4,7 +4,6 @@ package com.example.snutiexp.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -34,7 +33,7 @@ public final class ActivityLoginBinding implements ViewBinding {
   public final MaterialButton btnGoogle;
 
   @NonNull
-  public final Button btnLogin;
+  public final MaterialButton btnLogin;
 
   @NonNull
   public final EditText etLoginId;
@@ -62,10 +61,10 @@ public final class ActivityLoginBinding implements ViewBinding {
 
   private ActivityLoginBinding(@NonNull ConstraintLayout rootView, @NonNull MaterialButton btnApple,
       @NonNull MaterialButton btnGoSignup, @NonNull MaterialButton btnGoogle,
-      @NonNull Button btnLogin, @NonNull EditText etLoginId, @NonNull TextInputEditText etLoginPw,
-      @NonNull TextInputLayout tilLoginPw, @NonNull TextView tvFindPassword,
-      @NonNull TextView tvLabelEmail, @NonNull TextView tvLabelPw, @NonNull TextView tvLoginTitle,
-      @NonNull TextView tvOr) {
+      @NonNull MaterialButton btnLogin, @NonNull EditText etLoginId,
+      @NonNull TextInputEditText etLoginPw, @NonNull TextInputLayout tilLoginPw,
+      @NonNull TextView tvFindPassword, @NonNull TextView tvLabelEmail, @NonNull TextView tvLabelPw,
+      @NonNull TextView tvLoginTitle, @NonNull TextView tvOr) {
     this.rootView = rootView;
     this.btnApple = btnApple;
     this.btnGoSignup = btnGoSignup;
@@ -127,7 +126,7 @@ public final class ActivityLoginBinding implements ViewBinding {
       }
 
       id = R.id.btn_login;
-      Button btnLogin = ViewBindings.findChildViewById(rootView, id);
+      MaterialButton btnLogin = ViewBindings.findChildViewById(rootView, id);
       if (btnLogin == null) {
         break missingId;
       }

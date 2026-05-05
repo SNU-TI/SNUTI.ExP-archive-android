@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_white_round_stroke">
+
+    <!-- 강연 제목 -->
+    <TextView
+        android:id="@+id/tv_lecture_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="강연 제목이 들어갑니다"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tv_lecture_date"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- 강연자 및 장소 정보 -->
+    <TextView
+        android:id="@+id/tv_lecture_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="강연자 | 장소"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_lecture_title"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- 강연 날짜 -->
+    <TextView
+        android:id="@+id/tv_lecture_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2026-05-04"
+        android:textSize="12sp"
+        android:textColor="#999999"
+        app:layout_constraintTop_toTopOf="@id/tv_lecture_title"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

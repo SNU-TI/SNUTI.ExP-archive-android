@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.snutiexp.app-mergeDebugResources-46:/values-en-rAU/values-en-rAU.xml",
+            "outputFile": "com.example.snutiexp.app-mergeDebugResources-47:/values-en-rAU/values-en-rAU.xml",
             "map": [
                 {
                     "source": "C:\\Users\\limit\\.gradle\\caches\\8.11.1\\transforms\\870a2108a03531d5ae7ed463044a2fa4\\transformed\\navigation-ui-2.9.7\\res\\values-en-rAU\\values-en-rAU.xml",

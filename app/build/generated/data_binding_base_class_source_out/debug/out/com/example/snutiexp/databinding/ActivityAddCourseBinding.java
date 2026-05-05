@@ -4,11 +4,15 @@ package com.example.snutiexp.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
@@ -22,13 +26,43 @@ public final class ActivityAddCourseBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
-  public final Button btnSave;
+  public final AppCompatButton btnAddImageActivity;
 
   @NonNull
-  public final EditText etCourseName;
+  public final AppCompatButton btnAddTextActivity;
 
   @NonNull
-  public final EditText etProfessorName;
+  public final ImageButton btnBack;
+
+  @NonNull
+  public final ImageButton btnDone;
+
+  @NonNull
+  public final LinearLayout btnSwitchEdit;
+
+  @NonNull
+  public final LinearLayout btnSwitchInfo;
+
+  @NonNull
+  public final FrameLayout courseFrameContainer;
+
+  @NonNull
+  public final ImageView ivEditIcon;
+
+  @NonNull
+  public final ImageView ivInfoIcon;
+
+  @NonNull
+  public final LinearLayout layoutBottomSwitcher;
+
+  @NonNull
+  public final LinearLayout layoutSectionAddButtons;
+
+  @NonNull
+  public final View loadingOverlay;
+
+  @NonNull
+  public final ProgressBar loadingProgress;
 
   @NonNull
   public final ConstraintLayout main;
@@ -36,15 +70,39 @@ public final class ActivityAddCourseBinding implements ViewBinding {
   @NonNull
   public final TextView tvAddTitle;
 
-  private ActivityAddCourseBinding(@NonNull ConstraintLayout rootView, @NonNull Button btnSave,
-      @NonNull EditText etCourseName, @NonNull EditText etProfessorName,
-      @NonNull ConstraintLayout main, @NonNull TextView tvAddTitle) {
+  @NonNull
+  public final TextView tvEditLabel;
+
+  @NonNull
+  public final TextView tvInfoLabel;
+
+  private ActivityAddCourseBinding(@NonNull ConstraintLayout rootView,
+      @NonNull AppCompatButton btnAddImageActivity, @NonNull AppCompatButton btnAddTextActivity,
+      @NonNull ImageButton btnBack, @NonNull ImageButton btnDone,
+      @NonNull LinearLayout btnSwitchEdit, @NonNull LinearLayout btnSwitchInfo,
+      @NonNull FrameLayout courseFrameContainer, @NonNull ImageView ivEditIcon,
+      @NonNull ImageView ivInfoIcon, @NonNull LinearLayout layoutBottomSwitcher,
+      @NonNull LinearLayout layoutSectionAddButtons, @NonNull View loadingOverlay,
+      @NonNull ProgressBar loadingProgress, @NonNull ConstraintLayout main,
+      @NonNull TextView tvAddTitle, @NonNull TextView tvEditLabel, @NonNull TextView tvInfoLabel) {
     this.rootView = rootView;
-    this.btnSave = btnSave;
-    this.etCourseName = etCourseName;
-    this.etProfessorName = etProfessorName;
+    this.btnAddImageActivity = btnAddImageActivity;
+    this.btnAddTextActivity = btnAddTextActivity;
+    this.btnBack = btnBack;
+    this.btnDone = btnDone;
+    this.btnSwitchEdit = btnSwitchEdit;
+    this.btnSwitchInfo = btnSwitchInfo;
+    this.courseFrameContainer = courseFrameContainer;
+    this.ivEditIcon = ivEditIcon;
+    this.ivInfoIcon = ivInfoIcon;
+    this.layoutBottomSwitcher = layoutBottomSwitcher;
+    this.layoutSectionAddButtons = layoutSectionAddButtons;
+    this.loadingOverlay = loadingOverlay;
+    this.loadingProgress = loadingProgress;
     this.main = main;
     this.tvAddTitle = tvAddTitle;
+    this.tvEditLabel = tvEditLabel;
+    this.tvInfoLabel = tvInfoLabel;
   }
 
   @Override
@@ -74,21 +132,81 @@ public final class ActivityAddCourseBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.btn_save;
-      Button btnSave = ViewBindings.findChildViewById(rootView, id);
-      if (btnSave == null) {
+      id = R.id.btn_add_image_activity;
+      AppCompatButton btnAddImageActivity = ViewBindings.findChildViewById(rootView, id);
+      if (btnAddImageActivity == null) {
         break missingId;
       }
 
-      id = R.id.et_course_name;
-      EditText etCourseName = ViewBindings.findChildViewById(rootView, id);
-      if (etCourseName == null) {
+      id = R.id.btn_add_text_activity;
+      AppCompatButton btnAddTextActivity = ViewBindings.findChildViewById(rootView, id);
+      if (btnAddTextActivity == null) {
         break missingId;
       }
 
-      id = R.id.et_professor_name;
-      EditText etProfessorName = ViewBindings.findChildViewById(rootView, id);
-      if (etProfessorName == null) {
+      id = R.id.btn_back;
+      ImageButton btnBack = ViewBindings.findChildViewById(rootView, id);
+      if (btnBack == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_done;
+      ImageButton btnDone = ViewBindings.findChildViewById(rootView, id);
+      if (btnDone == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_switch_edit;
+      LinearLayout btnSwitchEdit = ViewBindings.findChildViewById(rootView, id);
+      if (btnSwitchEdit == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_switch_info;
+      LinearLayout btnSwitchInfo = ViewBindings.findChildViewById(rootView, id);
+      if (btnSwitchInfo == null) {
+        break missingId;
+      }
+
+      id = R.id.course_frame_container;
+      FrameLayout courseFrameContainer = ViewBindings.findChildViewById(rootView, id);
+      if (courseFrameContainer == null) {
+        break missingId;
+      }
+
+      id = R.id.iv_edit_icon;
+      ImageView ivEditIcon = ViewBindings.findChildViewById(rootView, id);
+      if (ivEditIcon == null) {
+        break missingId;
+      }
+
+      id = R.id.iv_info_icon;
+      ImageView ivInfoIcon = ViewBindings.findChildViewById(rootView, id);
+      if (ivInfoIcon == null) {
+        break missingId;
+      }
+
+      id = R.id.layout_bottom_switcher;
+      LinearLayout layoutBottomSwitcher = ViewBindings.findChildViewById(rootView, id);
+      if (layoutBottomSwitcher == null) {
+        break missingId;
+      }
+
+      id = R.id.layout_section_add_buttons;
+      LinearLayout layoutSectionAddButtons = ViewBindings.findChildViewById(rootView, id);
+      if (layoutSectionAddButtons == null) {
+        break missingId;
+      }
+
+      id = R.id.loading_overlay;
+      View loadingOverlay = ViewBindings.findChildViewById(rootView, id);
+      if (loadingOverlay == null) {
+        break missingId;
+      }
+
+      id = R.id.loading_progress;
+      ProgressBar loadingProgress = ViewBindings.findChildViewById(rootView, id);
+      if (loadingProgress == null) {
         break missingId;
       }
 
@@ -100,8 +218,22 @@ public final class ActivityAddCourseBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityAddCourseBinding((ConstraintLayout) rootView, btnSave, etCourseName,
-          etProfessorName, main, tvAddTitle);
+      id = R.id.tv_edit_label;
+      TextView tvEditLabel = ViewBindings.findChildViewById(rootView, id);
+      if (tvEditLabel == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_info_label;
+      TextView tvInfoLabel = ViewBindings.findChildViewById(rootView, id);
+      if (tvInfoLabel == null) {
+        break missingId;
+      }
+
+      return new ActivityAddCourseBinding((ConstraintLayout) rootView, btnAddImageActivity,
+          btnAddTextActivity, btnBack, btnDone, btnSwitchEdit, btnSwitchInfo, courseFrameContainer,
+          ivEditIcon, ivInfoIcon, layoutBottomSwitcher, layoutSectionAddButtons, loadingOverlay,
+          loadingProgress, main, tvAddTitle, tvEditLabel, tvInfoLabel);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainListFragment">
+    tools:context=".main.MainLectureListFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- 1. 기존 TextView를 삭제하고 RecyclerView를 추가합니다 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_lectures"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:clipToPadding="false"
+        android:paddingTop="10dp"
+        android:paddingBottom="100dp"
+        tools:listitem="@layout/item_lecture" />
 
 </FrameLayout>

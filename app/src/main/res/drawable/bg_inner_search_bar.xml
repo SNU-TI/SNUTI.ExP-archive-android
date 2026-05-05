@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 배경색: 현재 사용 중인 연한 회색 -->
+    <solid android:color="#F2F2F2" />
+
+    <!-- ★ 수정 포인트: 검색창의 둥근 정도 ★ -->
+    <!-- 이 숫자를 높일수록 양 끝이 반원 모양인 캡슐형이 됩니다 (25dp 이상 추천) -->
+    <corners android:radius="25dp" />
+</shape>

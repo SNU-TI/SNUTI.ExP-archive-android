@@ -1,0 +1,12 @@
+# Gradle 임시 파일 및 빌드 결과물
+.gradle/
+build/
+
+# 로컬 환경 설정 (비밀번호나 경로 등이 담겨 있어 공유하면 안 됨)
+local.properties
+.idea/workspace.xml
+.idea/libraries/
+
+# 로그 및 캐시
+*.log
+.idea/shelf/

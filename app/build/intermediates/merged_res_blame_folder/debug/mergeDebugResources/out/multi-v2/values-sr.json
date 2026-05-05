@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.snutiexp.app-mergeDebugResources-46:/values-sr/values-sr.xml",
+            "outputFile": "com.example.snutiexp.app-mergeDebugResources-47:/values-sr/values-sr.xml",
             "map": [
                 {
                     "source": "C:\\Users\\limit\\.gradle\\caches\\8.11.1\\transforms\\ee059e898ea94894cec6576ca392842b\\transformed\\material-1.13.0\\res\\values-sr\\values-sr.xml",
