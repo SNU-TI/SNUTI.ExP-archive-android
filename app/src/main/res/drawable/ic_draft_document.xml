@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    [사용자 확인용 주석: 임시 저장 드래프트 문서함을 상징하는 라인 아트 벡터 리소스]
+    - 크기: 메뉴 아이콘 내 배치 밸런스를 고려하여 표준 24dp x 24dp 규격으로 캔버스를 빌드했습니다.
+    - 색상: 팝업 메뉴 고유의 텍스트 톤과 자연스럽게 녹아들도록 깔끔한 검은색(#000000)을 적용했습니다.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!--
+        [사용자 확인용 주석: 1. 오른쪽 상단 귀퉁이가 접힌 정석적인 서류/문서 아웃라인 패스 정의]
+        상단 접힌 단면(Folded Corner) 디자인을 삽입하여 단순 사각형이 아닌 '문서'임을 직관적으로 인지시킵니다.
+    -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M14,2H6c-1.1,0 -1.99,0.9 -1.99,2L4,20c0,1.1 0.89,2 1.99,2H18c1.1,0 2,-0.9 2,-2V8l-6,-6zM6,20V4h7v5h5v11H6z"/>
+
+    <!-- [사용자 확인용 주석: 2. 문서 내부에 작성 중인 텍스트 문단 라인을 시각화하는 수평 패스 정의] -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M8,12h8v2H8z"/>
+
+    <!-- [사용자 확인용 주석: 3. 문서 하단부의 두 번째 서식 줄무늬 라인 패스 정의] -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M8,16h8v2H8z"/>
+</vector>

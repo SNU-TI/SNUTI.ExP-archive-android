@@ -3,7 +3,9 @@ package com.example.snutiexp.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.snutiexp.R
@@ -14,21 +16,36 @@ class MainActivity : AppCompatActivity() {
     // 바인딩 객체 선언 (나중에 초기화하겠다는 의미)
     private lateinit var binding: ActivityMainBinding
 
+    // 현재 띄워진 화면 상태를 추적하는 동적 플래그 변수 (false:초기값/true:드래프트 강좌)
+    private var isCurrentScreenDraft: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // (현재 앱의 로그인 방식이나 전역 상태 관리 로직에 맞춰서 검증 로직 변수를 대입하세요)
+        val isAdminUser = checkUserAdminStatus() // 예시: SharedPreferences 나 싱글톤 객체 등에서 가져옴
+
+        if (isAdminUser) {
+            // 관리자 계정이 맞다면 숨겨져 있던 플러스 버튼을 화면에 다시 노출시킵니다.
+            binding.btnAdd.visibility = View.VISIBLE
+        } else {
+            // 일반 사용자 계정이라면 확실히 보이지 않도록 잠가 둡니다.
+            binding.btnAdd.visibility = View.GONE
+        }
 
         // 메인 리스트 프래그먼트를 처음에 띄웁니다.
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, MainLectureListFragment()) // ActivityMain의 컨테이너 ID 확인 필요
             .commit()
 
-        // 플러스 버튼 클릭 이벤트 구현
-        binding.btnAdd.setOnClickListener {
-            // AddCourseActivity로 이동하는 의도(Intent) 전달
-            val intent = Intent(this, AddCourseActivity::class.java)
-            startActivity(intent)
+        // 관리자 버튼
+        binding.btnAdd.setOnClickListener { view ->
+            showAdminPopupMenu(view)
+//            // AddCourseActivity로 이동하는 의도(Intent) 전달
+//            val intent = Intent(this, AddCourseActivity::class.java)
+//            startActivity(intent)
         }
 
         // 사람 아이콘 클릭 시
@@ -68,5 +85,68 @@ class MainActivity : AppCompatActivity() {
             val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
             imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
         }
+    }
+
+    // 관리자 전용 드롭다운 팝업창
+    private fun showAdminPopupMenu(anchorView: View) {
+        val popup = PopupMenu(this, anchorView)
+        if (!isCurrentScreenDraft) {
+            // 일반 강좌 목록 상태일 때: 기존의 '새 강좌 추가' / '드래프트 보기' 메뉴를 팽창시킵니다.
+            popup.menuInflater.inflate(R.menu.menu_admin_options, popup.menu)
+            // 기본 팝업 메뉴에서 아이콘을 강제로 보여주게 만드는 핵심 기법
+            popup.setForceShowIcon(true)
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_add_course -> {
+                        val intent = Intent(this, AddCourseActivity::class.java)
+                        startActivity(intent)
+                        true
+                    }
+                    R.id.menu_draft_list -> {
+                        // 드래프트 보기 클릭 시: 드래프트 전용 프래그먼트로 화면을 갈아끼우고 플래그를 true로 스위칭합니다.
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.main_container, DraftLectureListFragment()) // 추후 구현할 드래프트 프래그먼트 가정
+                        .commit()
+                        isCurrentScreenDraft = true
+                        Toast.makeText(this, "드래프트 목록으로 전환되었습니다.", Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        } else {
+            // 드래프트 강좌 목록에 이미 진입한 상태일 때: 고용주님이 지시하신 새로운 메뉴 스펙을 팽창시킵니다.
+            popup.menuInflater.inflate(R.menu.menu_draft_options, popup.menu)
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_add_course_from_draft -> {
+                        // 새 강좌 추가하기 선택 시: 동일하게 강좌 추가 액티비티 화면으로 연결합니다.
+                        val intent = Intent(this, AddCourseActivity::class.java)
+                        startActivity(intent)
+                        true
+                    }
+                    R.id.menu_go_back_to_main -> {
+                        // 기존 화면으로 돌아가기 선택 시: 다시 메인 리스트 프래그먼트를 안착시키고 플래그를 false로 원복합니다.
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.main_container, MainLectureListFragment())
+                            .commit()
+                        isCurrentScreenDraft = false
+                        Toast.makeText(this, "기존 강좌 목록 화면으로 복귀했습니다.", Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
+        popup.show()
+    }
+
+    // 💡 [임시 가상 함수] 유저가 관리자인지 여부를 가져오는 임시 검증 함수 예시
+    private fun checkUserAdminStatus(): Boolean {
+        // 실제 구현 시에는 이 구역에서 SharedPreferences 정보를 꺼내오거나,
+        // 전역 로그인 유저 데이터 인스턴스의 등급(Role == "ADMIN")을 비교하여 return 하도록 작성해 주시면 됩니다.
+        return true // 테스트 시에는 true/false를 바꾸어 가며 버튼 작동 여부를 확인해 보세요.
     }
 }

@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="#FFFFFF">
 
     <TextView
@@ -63,8 +64,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_add_title"
-        app:layout_constraintBottom_toTopOf="@id/layout_section_add_buttons" />
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_switcher" />
 
     <!-- ★ 문서 편집 시에만 나타날 섹션 추가 버튼 ★ -->
     <LinearLayout
@@ -124,13 +126,12 @@
         android:id="@+id/layout_bottom_switcher"
         android:layout_width="wrap_content"
         android:layout_height="64dp"
-        android:layout_marginBottom="70dp"
         android:background="@drawable/bg_search_group"
         android:elevation="10dp"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/keyboard_spacer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -178,6 +179,21 @@
                 android:textColor="#000000" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- 높이를 고정값(70dp)이 아닌 0dp로 변경하고, 제약 조건을 위아래로 모두 연결한 뒤
+    가상 가중치(match_constraint_percent)를 부여합니다. 이렇게 하면 평소에는 전체 화면의 딱 70dp 만큼 공간을 벌려주다가,
+     키보드가 켜져서 전체 화면이 수축하면 자기 높이를 0dp로 스스로 압축하며 흔적도 없이 사라집니다. -->
+    <View
+        android:id="@+id/keyboard_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_default="wrap"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        android:minHeight="0dp"
+        app:layout_constraintHeight_max="40dp"
+        app:layout_constraintHeight_min="0dp" />
 
     <!-- ★ 로딩 중 배경을 어둡게 막아주는 오버레이 (클릭 방지용) ★ -->
     <View

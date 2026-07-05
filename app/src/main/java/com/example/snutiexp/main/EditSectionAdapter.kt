@@ -78,10 +78,25 @@ class EditSectionAdapter(
                 // 안전하게 현재 위치를 가져와서 삭제
                 val currentPos = holder.adapterPosition
                 if (currentPos != RecyclerView.NO_POSITION) {
-                    items.removeAt(currentPos)
-                    notifyItemRemoved(currentPos)
-                    // 삭제 후 번호 갱신을 위해 범위 변경 알림
-                    notifyItemRangeChanged(currentPos, items.size)
+                    // 다이얼로그를 띄우기 위해 버튼(View)이 속한 컨텍스트(Context)를 가져옵니다.
+                    val context = holder.itemView.context
+
+                    // 1. 삭제 확인 알림창(AlertDialog) 생성
+                    androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setTitle("섹션 삭제") // 다이얼로그 제목
+                        .setMessage("Section ${currentPos + 1}을 정말로 삭제하시겠습니까?\n작성된 내용이 모두 사라집니다.") // 다이얼로그 본문
+                        .setPositiveButton("삭제") { dialog, _ ->
+                            // 사용자가 '삭제'를 눌렀을 때만 실제 데이터 제거 및 화면 갱신을 진행합니다.
+                            items.removeAt(currentPos)
+                            notifyItemRemoved(currentPos)
+                            notifyItemRangeChanged(currentPos, items.size) // 삭제 후 하위 섹션 번호들 갱신
+                            dialog.dismiss() // 알림창 닫기
+                        }
+                        .setNegativeButton("취소") { dialog, _ ->
+                            // '취소'를 누르면 데이터 변경 없이 알림창만 닫습니다.
+                            dialog.dismiss()
+                        }
+                        .show() // 2. 화면에 알림창 표시
                 }
             }
         }

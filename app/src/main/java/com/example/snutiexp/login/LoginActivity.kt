@@ -25,12 +25,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Retrofit 설정 (회원가입과 동일한 주소)
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://43.201.109.122:8080/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val authService = retrofit.create(AuthService::class.java)
+        val authService = RetrofitClient.authService
 
         // [회원가입하러 가기] 버튼 기능 (이미 구현된 부분)
         binding.btnGoSignup.setOnClickListener {

@@ -1,5 +1,6 @@
 package com.example.snutiexp.main
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -37,17 +38,20 @@ class LectureAdapter(private var items: List<LectureListItem>) :
             tvLectureDate.text = item.lectureDate.split("T")[0]
 
             // 4. 아이템 클릭 시 상세 화면 이동 (추후 구현)
-            root.setOnClickListener {
-                // TODO: 상세 페이지 이동 로직 (lectureId 전달)
+            root.setOnClickListener {view ->
+                val context = view.context
+                val intent = Intent(context, LectureDetailActivity::class.java).apply {
+                    // 서버 통신 및 조회를 위해 클릭된 강좌의 고유 ID를 인텐트에 전달
+                    putExtra("LECTURE_ID", item.id)
+                }
+                context.startActivity(intent)
             }
         }
     }
 
     override fun getItemCount(): Int = items.size
 
-    /**
-     * 서버에서 새로운 목록을 받아왔을 때 리스트를 갱신합니다.
-     */
+    // 서버에서 새로운 목록을 받아왔을 때 리스트를 갱신합니다.
     fun updateList(newList: List<LectureListItem>) {
         this.items = newList
         notifyDataSetChanged() // 전체 리스트 갱신 알림

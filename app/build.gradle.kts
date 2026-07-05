@@ -58,4 +58,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // 이미지 로딩 라이브러리 Glide 추가
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

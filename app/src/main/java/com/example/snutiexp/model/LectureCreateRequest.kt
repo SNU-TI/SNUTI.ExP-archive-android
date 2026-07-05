@@ -7,5 +7,5 @@ data class LectureCreateRequest(
     val lectureSummary: String,
     val lecturerName: String,
     val topic: String,
-    val status: String = "DRAFT"
+    val status: String = "PUBLISHED"
 )

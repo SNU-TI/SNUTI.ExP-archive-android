@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainListFragment"
-        android:name="com.example.snutiexp.MainListFragment"
+        android:name="com.example.snutiexp.main.MainListFragment"
         android:label="fragment_main_list"
         tools:layout="@layout/fragment_main_list" />
 </navigation>

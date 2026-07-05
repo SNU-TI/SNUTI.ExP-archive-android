@@ -27,4 +27,10 @@ interface LectureService {
         @Query("size") size: Int = 20,
         @Query("sort") sort: String = "id,desc"
     ): Call<LectureListResponse>
+
+    // 강연 상세 조회
+    @GET("/lectures/{id}")
+    fun getLectureDetail(
+        @Path("id") id: Long
+    ): Call<LectureDetailResponse>
 }

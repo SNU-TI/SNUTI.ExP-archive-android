@@ -21,7 +21,6 @@ class MainLectureListFragment : Fragment() {
     private var _binding: FragmentMainListBinding? = null
     private val binding get() = _binding!!
 
-    private val lectureList = mutableListOf<LectureListItem>()
     private lateinit var lectureAdapter: LectureAdapter
 
     override fun onCreateView(
@@ -43,7 +42,7 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        lectureAdapter = LectureAdapter(lectureList)
+        lectureAdapter = LectureAdapter(emptyList())
         binding.rvLectures.apply {
             adapter = lectureAdapter
             layoutManager = LinearLayoutManager(requireContext())
@@ -51,14 +50,20 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun loadLectures() {
-        RetrofitClient.service.getLectures().enqueue(object : Callback<LectureListResponse> {
-            @SuppressLint("NotifyDataSetChanged")
+        RetrofitClient.service.getLectures(page = 0, size = 20, sort = "id,desc")
+            .enqueue(object : Callback<LectureListResponse> {
             override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
                 if (response.isSuccessful) {
-                    val newItems = response.body()?.content ?: return
-                    lectureList.clear()
-                    lectureList.addAll(newItems)
-                    lectureAdapter.notifyDataSetChanged()
+                    val responseBody = response.body()
+                    val newItems = responseBody?.content ?: emptyList()
+
+                    // [진단용 로그] 서버가 실제로 몇 개를 보내주는지 로그캣에서 확인하세요.
+                    Log.d("API_TEST", "전체 응답 바디: $responseBody")
+                    Log.d("API_TEST", "강좌 개수(newItems.size): ${newItems.size}")
+                    Log.d("API_TEST", "전체 강좌 수(totalElements): ${responseBody?.totalElements}")
+
+                    // 어댑터의 리스트를 갱신합니다. (회색 밑줄이 사라집니다)
+                    lectureAdapter.updateList(newItems)
                 } else {
                     Log.e("API_ERROR", "Status Code: ${response.code()}")
                     Log.e("API_ERROR", "Error Body: ${response.errorBody()?.string()}")
@@ -67,6 +72,7 @@ class MainLectureListFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
                 Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             }
         })

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 드래프트 화면 진입 상태에서 + 버튼을 누르면 기존 메뉴 대신 이 메뉴가 나타납니다. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_add_course_from_draft"
+        android:icon="@drawable/ic_btn_add"
+        android:title="새 강좌 추가하기" />
+    <item
+        android:id="@+id/menu_go_back_to_main"
+        android:icon="@drawable/ic_draft_document"
+        android:title="기존 화면으로 돌아가기" />
+</menu>

@@ -28,6 +28,9 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class AddCourseActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddCourseBinding
@@ -143,11 +146,41 @@ class AddCourseActivity : AppCompatActivity() {
         RetrofitClient.service.createLecture(createRequest).enqueue(object : Callback<LectureCreateResponse> {
             override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
                 if (response.isSuccessful) {
-                    val lectureId = response.body()?.id ?: return
-                    uploadArticles(lectureId)
+                    val responseBody = response.body()
+                    // [Step 1] 로그를 통해 서버가 준 응답 전체를 확인합니다.
+                    Log.d("REGISTER_DEBUG", "서버 응답 성공: $responseBody")
+
+                    // [Step 1 & 2] ID 추출 시도 (id 혹은 lectureId 필드명 불일치 체크)
+                    val lectureId = responseBody?.id
+
+                    if (lectureId != null) {
+                        Log.d("REGISTER_DEBUG", "추출된 ID: $lectureId")
+                        // 3. 편집 프래그먼트에서 섹션 데이터를 가져옵니다.
+                        val sections = editFragment.getSectionData()
+
+                        if (sections.isEmpty()) {
+                            // --- [수정 포인트] 섹션(내용)이 없으면 여기서 즉시 종료 ---
+                            // 내용(섹션)이 없는 경우: 여기서 바로 등록 완료 처리
+                            Log.d("REGISTER_DEBUG", "섹션이 비어있음. 강연 정보만 등록하고 종료합니다.")
+                            setLoading(false)
+                            Toast.makeText(
+                                this@AddCourseActivity,
+                                "강연 정보가 등록되었습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            finish() // 강연 정보만 생성하고 바로 메인으로 돌아감
+                        } else {
+                            // 섹션이 있으면 기존대로 아티클 업로드 진행
+                            Log.d("REGISTER_DEBUG", "섹션 존재 (${sections.size}개). 아티클 업로드를 시작합니다.")
+                            uploadArticles(lectureId)
+                        }
+                    }
+//                  val lectureId = response.body()?.id ?: return
+//                  uploadArticles(lectureId)
                 } else {
                     // --- [실패] 로딩 해제 ---
                     setLoading(false)
+                    Log.e("REGISTER_DEBUG", "ID 추출 실패! 서버 응답 모델(LectureCreateResponse)의 필드명을 확인하세요.")
                     Toast.makeText(this@AddCourseActivity, "강연 생성 실패", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -155,6 +188,7 @@ class AddCourseActivity : AppCompatActivity() {
             override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
                 // --- [오류] 로딩 해제 ---
                 setLoading(false)
+                Log.e("REGISTER_DEBUG", "네트워크 실패: ${t.message}")
                 Toast.makeText(this@AddCourseActivity, "네트워크 오류", Toast.LENGTH_SHORT).show()
             }
         })
