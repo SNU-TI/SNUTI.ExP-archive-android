@@ -13,14 +13,16 @@
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
         android:background="@drawable/bg_white_circle"
         android:elevation="4dp"
-        android:padding="12dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_back"
         android:contentDescription="뒤로가기"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.075" />
 
     <!-- 강의 수정 버튼 -->
     <ImageButton
@@ -28,7 +30,6 @@
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
         android:background="@drawable/bg_red_circle"
         android:elevation="4dp"
         android:padding="12dp"
@@ -37,14 +38,15 @@
         android:visibility="gone"
         android:contentDescription="강의 수정"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
         tools:visibility="visible" />
 
     <!-- 전체 스크롤 영역 -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_back">
 

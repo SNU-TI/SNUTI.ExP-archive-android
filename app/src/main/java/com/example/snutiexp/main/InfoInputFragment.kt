@@ -51,6 +51,23 @@ class InfoInputFragment : Fragment() {
         }
     }
 
+    // 드래프트 기본 정보 입력창 원상 복원 구역
+    fun restoreDraftData(title: String?, lecturer: String?, date: String?, topic: String?, location: String?, summary: String?) {
+        val currentBinding = _binding ?: return
+        currentBinding.etTitle.setText(title ?: "")
+        currentBinding.etSpeaker.setText(lecturer ?: "")
+
+        val displayDate = if (date?.contains("T") == true) {
+            date.replace("T", " ").substringBeforeLast(":")
+        } else {
+            date ?: ""
+        }
+        currentBinding.etDate.setText(displayDate)
+        currentBinding.etSubject.setText(topic ?: "")
+        currentBinding.etLocation.setText(location ?: "")
+        currentBinding.etSummary.setText(summary ?: "")
+    }
+
     // 새로운 태그를 생성하여 FlexboxLayout에 추가하는 함수
     private fun addTagToLayout(text: String) {
         val tagView = TextView(requireContext()).apply {
@@ -121,15 +138,14 @@ class InfoInputFragment : Fragment() {
     }
 
     // 제목과 설명을 가져오는 함수 예시
-    fun getLectureCreateRequest(): LectureCreateRequest? {
+    fun getLectureCreateRequest(targetStatus: String): LectureCreateRequest? {
         val currentBinding = _binding ?: return null
 
         // 입력창에서 "2026-05-20 14:30" 같은 문자열을 가져옵니다.
         val inputDateTime = currentBinding.etDate.text.toString().trim()
-        var formattedDate = ""
+        var formattedDate = "2026-01-01T00:00:00.000Z"
 
         if (inputDateTime.isNotEmpty()) {
-            // 💡 [변경점] 공백을 기준으로 문자열을 잘라냅니다.
             // parts[0]에는 날짜("2026-05-20"), parts[1]에는 시간("14:30")이 할당됩니다.
             val parts = inputDateTime.split(" ")
 
@@ -143,6 +159,20 @@ class InfoInputFragment : Fragment() {
             }
         }
 
+        // 레이아웃에 렌더링된 태그 뷰들로부터 # 부호를 떼어낸 순수 문자열 배열을 빌드
+        val tagList = mutableListOf<String>()
+        val count = currentBinding.flexboxTags.childCount
+        for (i in 0 until count) {
+            val view = currentBinding.flexboxTags.getChildAt(i)
+            if (view is TextView) {
+                val rawText = view.text.toString()
+                val cleanText = if (rawText.startsWith("#")) rawText.substring(1) else rawText
+                if (cleanText.isNotEmpty()) {
+                    tagList.add(cleanText)
+                }
+            }
+        }
+
         return LectureCreateRequest(
             title = currentBinding.etTitle.text.toString(),
             lectureSummary = currentBinding.etSummary.text.toString(), // 요약/설명 입력창 ID
@@ -150,7 +180,8 @@ class InfoInputFragment : Fragment() {
             location = currentBinding.etLocation.text.toString(),      // 장소 입력창 ID
             lecturerName = currentBinding.etSpeaker.text.toString(),  // 강연자 입력창 ID
             topic = currentBinding.etSubject.text.toString(),            // 주제 입력창 ID
-            status = "PUBLISHED"                                    // 초기 상태
+            status = targetStatus,                                    // 초기 상태
+            tags = tagList
         )
     }
 

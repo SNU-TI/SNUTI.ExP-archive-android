@@ -61,4 +61,10 @@ dependencies {
 
     // 이미지 로딩 라이브러리 Glide 추가
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // 유튜브 플레이어 라이브러리 추가
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
+    // SwipeRefreshLayout 라이브러리 추가
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

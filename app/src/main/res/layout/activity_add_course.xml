@@ -3,60 +3,58 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="#FFFFFF">
 
-    <TextView
-        android:id="@+id/tv_add_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="정보 입력"
-        style="@style/TitleText"
-
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.075" />
-
     <ImageButton
         android:id="@+id/btn_back"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-
-        app:layout_constraintTop_toTopOf="@id/tv_add_title"
-        app:layout_constraintBottom_toBottomOf="@id/tv_add_title"
-
-        app:layout_constraintStart_toStartOf="parent"
-
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/bg_white_circle"
         android:padding="8dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back"
         app:tint="@color/black"
         android:elevation="4dp"
-        android:foreground="?attr/selectableItemBackgroundBorderless" />
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="뒤로가기"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 💡 부모의 Bottom 제약을 제거하고 뒤로가기 버튼에 수직 정렬을 완전 고정시킵니다 -->
+    <TextView
+        android:id="@+id/tv_add_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="정보 입력"
+        style="@style/TitleText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back" />
 
     <!-- ★ 문서 편집 시에만 나타날 파란 체크 버튼 ★ -->
     <ImageButton
         android:id="@+id/btn_done"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/bg_blue_circle"
         android:backgroundTint="#4A89FF"
         android:elevation="4dp"
+        android:padding="12dp"
         android:src="@drawable/ic_check_white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/tv_add_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_add_title"
-        app:tint="#FFFFFF" />
+        app:tint="#FFFFFF"
+        tools:visibility="visible"/>
 
     <!-- 프래그먼트 컨테이너 (여기에 정보입력/문서편집 화면이 번갈아 뜸) -->
     <FrameLayout

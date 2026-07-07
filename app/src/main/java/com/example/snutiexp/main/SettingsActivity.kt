@@ -58,14 +58,11 @@ class SettingsActivity : AppCompatActivity() {
 
     // 로그아웃 실제 수행 로직
     private fun performLogout() {
-        // 1. 휴대폰에 저장된 토큰 정보 삭제
+        // 휴대폰에 저장된 토큰 정보 삭제
         val sharedPref = getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
         sharedPref.edit().clear().apply()
 
-        // 2. 통신 클라이언트의 토큰 상태 초기화
-        RetrofitClient.setToken("")
-
-        // 3. 로그인 화면으로 이동 및 스택 클리어
+        // 로그인 화면으로 이동 및 스택 클리어
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

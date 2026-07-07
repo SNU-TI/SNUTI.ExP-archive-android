@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.snutiexp.R
 import com.example.snutiexp.databinding.ActivityMainBinding // 바인딩 클래스 임포트
+import com.example.snutiexp.network.RetrofitClient
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         // 배경 터치 시 포커스 해제 로직 유지
         binding.root.setOnClickListener {
             binding.etSearch.clearFocus()
-            val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
             imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
         }
     }
@@ -109,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                             .replace(R.id.main_container, DraftLectureListFragment()) // 추후 구현할 드래프트 프래그먼트 가정
                         .commit()
                         isCurrentScreenDraft = true
+                        updateTitle()
                         Toast.makeText(this, "드래프트 목록으로 전환되었습니다.", Toast.LENGTH_SHORT).show()
                         true
                     }
@@ -116,8 +119,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // 드래프트 강좌 목록에 이미 진입한 상태일 때: 고용주님이 지시하신 새로운 메뉴 스펙을 팽창시킵니다.
+            // 드래프트 강좌 목록에 이미 진입한 상태일 때: 새로운 메뉴 스펙을 팽창시킵니다.
             popup.menuInflater.inflate(R.menu.menu_draft_options, popup.menu)
+            // 기본 팝업 메뉴에서 아이콘을 강제로 보여주게 만드는 핵심 기법
+            popup.setForceShowIcon(true)
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -133,6 +138,7 @@ class MainActivity : AppCompatActivity() {
                             .replace(R.id.main_container, MainLectureListFragment())
                             .commit()
                         isCurrentScreenDraft = false
+                        updateTitle()
                         Toast.makeText(this, "기존 강좌 목록 화면으로 복귀했습니다.", Toast.LENGTH_SHORT).show()
                         true
                     }
@@ -143,10 +149,20 @@ class MainActivity : AppCompatActivity() {
         popup.show()
     }
 
-    // 💡 [임시 가상 함수] 유저가 관리자인지 여부를 가져오는 임시 검증 함수 예시
+    private fun updateTitle() {
+        if (isCurrentScreenDraft) {
+            binding.tvMainTitle.text = "Draft 강좌 목록" // ID는 실제 XML에 맞게 수정
+        } else {
+            binding.tvMainTitle.text = "강좌 목록"
+        }
+    }
+
+    // 로그인 시 SharedPreferences에 판별 보관된 관리자 플래그를 꺼내 연동
     private fun checkUserAdminStatus(): Boolean {
-        // 실제 구현 시에는 이 구역에서 SharedPreferences 정보를 꺼내오거나,
-        // 전역 로그인 유저 데이터 인스턴스의 등급(Role == "ADMIN")을 비교하여 return 하도록 작성해 주시면 됩니다.
-        return true // 테스트 시에는 true/false를 바꾸어 가며 버튼 작동 여부를 확인해 보세요.
+        // LoginActivity와 동일한 이름의 세션 저장소 파일을 참조합니다.
+        val sharedPref = getSharedPreferences("token_prefs", MODE_PRIVATE)
+
+        // 저장된 플래그를 꺼내옵니다. (보안 및 미인증 유저 예방을 위해 기본값은 false 처리)
+        return sharedPref.getBoolean("is_admin_user", false)
     }
 }

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.snutiexp.databinding.FragmentDocumentEditBinding
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.snutiexp.model.ArticleBlockResponse
 
 class DocumentEditFragment : Fragment() {
     private var _binding: FragmentDocumentEditBinding? = null
@@ -23,6 +24,15 @@ class DocumentEditFragment : Fragment() {
     // 사진이 들어갈 위치 저장
     private var selectedPosition: Int = -1
 
+    // 액티비티에서 보낸 데이터가 프래그먼트 뷰 생성보다 먼저 도착할 경우를 대비한 안전 백업 저장소
+    private var pendingBlocks: List<ArticleBlockResponse>? = null
+
+    // 수정하다가 지운 아티클 ID 목록
+    private val deletedArticleIds = mutableListOf<Long>()
+    
+    // 데이터가 복구되었는지 확인
+    private var isRestored: Boolean = false
+    
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             if (selectedPosition != -1) {
@@ -45,19 +55,70 @@ class DocumentEditFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
+
+        // 백업 데이터 강제 인플레션 구역
+        pendingBlocks?.let {
+            restoreArticles(it)
+            pendingBlocks = null // 소모 후 비우기
+        }
     }
 
     private fun setupRecyclerView() {
         // 어댑터 초기화 및 리사이클러뷰 연결 로직
-        sectionAdapter = EditSectionAdapter(sectionList) { position ->
+        sectionAdapter = EditSectionAdapter(sectionList, { position ->
             selectedPosition = position
-            pickImageLauncher.launch("image/*") // 갤러리 열기
-        }
+            pickImageLauncher.launch("image/*")
+        }, { removedSection ->
+            // 💡 만약 서버에 이미 등록되어 있던 유서 깊은 섹션이라면 삭제 대기열에 추가!
+            if (!removedSection.isNew && removedSection.articleId != null) {
+                deletedArticleIds.add(removedSection.articleId!!)
+            }
+        })
+
         binding.rvSections.apply {
             adapter = sectionAdapter
             layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+
+    // 기존 아티클 본문 섹션 데이터 원상 복원 구역
+    fun restoreArticles(blocks: List<ArticleBlockResponse>) {
+        if (_binding == null || !::sectionAdapter.isInitialized) {
+            // 💡 뷰가 아직 안 그려졌다면 백업소에 임시 보관하고 탈출!
+            pendingBlocks = blocks
+            return
+        }
+
+        // 이미 복구가 완료되었다면 현재 상태 유지
+        if (isRestored) {
+            android.util.Log.d("REGISTER_DEBUG", "이미 복원이 완료된 상태이므로 데이터 유지를 위해 복원 통지를 생략합니다.")
+            return
+        }
+        // 기존의 비어있던 리스트 초기화
+        sectionList.clear()
+        deletedArticleIds.clear()
+
+        blocks.forEach { block ->
+            val restoredSection = EditSection(
+                id = block.id.toInt(),
+                type = block.type.name, // "TEXT" 또는 "IMAGE"
+                content = block.textContent ?: "", // 기존 입력했던 텍스트 복구
+                imageUri = block.imageUrl, // 기존 업로드했던 이미지 경로 복구
+                articleId = block.id,  // 💡 진짜 서버 아티클 ID 세팅
+                isNew = false          // 💡 서버에서 온 것이므로 false
+            )
+            sectionList.add(restoredSection)
+        }
+
+        // 복원 완수 마킹
+        isRestored = true
+
+        binding.rvSections.post {
+            if (::sectionAdapter.isInitialized) {
+                android.util.Log.d("REGISTER_DEBUG", "최초 복원 확정: 어댑터 렌더링 시작 (개수: ${sectionList.size})")
+                sectionAdapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -80,6 +141,11 @@ class DocumentEditFragment : Fragment() {
     // 현재까지 작성된 섹션 리스트를 반환하는 함수
     fun getSectionData(): List<EditSection> {
         return sectionList
+    }
+
+    // 액티비티에서 지워야 할 것들 지우는 함수
+    fun getDeletedArticleIds(): List<Long> {
+        return deletedArticleIds
     }
 
     override fun onDestroyView() {

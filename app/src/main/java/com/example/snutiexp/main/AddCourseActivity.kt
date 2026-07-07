@@ -2,7 +2,6 @@ package com.example.snutiexp.main
 
 import android.graphics.Color
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -14,10 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.snutiexp.R
 import com.example.snutiexp.databinding.ActivityAddCourseBinding
+import com.example.snutiexp.model.*
 import com.example.snutiexp.network.RetrofitClient
-import com.example.snutiexp.model.LectureCreateRequest
-import com.example.snutiexp.model.LectureCreateResponse
-import com.example.snutiexp.model.ArticleCreateRequest
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -28,9 +25,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.constraintlayout.widget.ConstraintLayout
 
 class AddCourseActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddCourseBinding
@@ -38,6 +32,12 @@ class AddCourseActivity : AppCompatActivity() {
     private val infoFragment = InfoInputFragment()
     private val editFragment = DocumentEditFragment()
 
+    private var pendingStatus: String = "DRAFT"
+
+    private var isEdit: Boolean = false
+    private var lectureId: Long = -1L
+
+    private var fetchedBlocks: List<ArticleBlockResponse>? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -63,12 +63,48 @@ class AddCourseActivity : AppCompatActivity() {
             .hide(editFragment) // 편집창은 일단 숨김
             .commit()
 
+        // 편집 복원 분기 시점 제어
+        isEdit = intent.getBooleanExtra("IS_EDIT", false)
+        lectureId = intent.getLongExtra("LECTURE_ID", -1)
+
+        if (isEdit) {
+            window.decorView.post {
+                infoFragment.restoreDraftData(
+                    title = intent.getStringExtra("EDIT_TITLE"),
+                    lecturer = intent.getStringExtra("EDIT_LECTURER"),
+                    date = intent.getStringExtra("EDIT_DATE"),
+                    topic = intent.getStringExtra("EDIT_TOPIC"),
+                    location = intent.getStringExtra("EDIT_LOCATION"),
+                    summary = intent.getStringExtra("EDIT_SUMMARY")
+                )
+            }
+            if (lectureId != -1L) {
+                fetchAndRestoreArticles(lectureId)
+            }
+        }
+
         // --- 섹션 추가 버튼 클릭 이벤트 연결 ---
         setupSectionButtons()
 
         // --- 파란 체크 버튼(완료) 클릭 이벤트 ---
         binding.btnDone.setOnClickListener {
-            checkPermissionAndUpload()
+            android.app.AlertDialog.Builder(this)
+                .setTitle("강의 저장 설정")
+                .setMessage("이 강의를 바로 게시하시겠습니까, 아니면 임시저장 하시겠습니까?")
+                .setPositiveButton("강의 게시") { dialog, _ ->
+                    dialog.dismiss()
+                    pendingStatus = "PUBLISHED"
+                    checkPermissionAndUpload()
+                }
+                .setNegativeButton("임시저장") { dialog, _ ->
+                    dialog.dismiss()
+                    pendingStatus = "DRAFT"
+                    checkPermissionAndUpload()
+                }
+                .setNeutralButton("취소") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
         }
 
         // 스위처 클릭 이벤트 (정보 <-> 편집 전환)
@@ -86,10 +122,39 @@ class AddCourseActivity : AppCompatActivity() {
                 .show(editFragment)
                 .hide(infoFragment)
                 .commit()
+
+            // 문서 편집 창으로 전환되는 교차점에 백업 데이터 강제 밀어넣기 작동
+            fetchedBlocks?.let { blocks ->
+                editFragment.restoreArticles(blocks)
+            }
         }
 
         // 뒤로가기 버튼
         binding.btnBack.setOnClickListener { finish() }
+    }
+
+    // 수정 모드 진입 시 본문 편집창(DocumentEditFragment)에 기존 섹션들을 리스토어하기 위해 상세 데이터를 땡겨오는 통신 파이프라인
+    private fun fetchAndRestoreArticles(id: Long) {
+        RetrofitClient.service.getAdminLectureDetail(id).enqueue(object : Callback<LectureDetailResponse> {
+            override fun onResponse(call: Call<LectureDetailResponse>, response: Response<LectureDetailResponse>) {
+                if (response.isSuccessful) {
+                    val lectureData = response.body() ?: return
+                    // Swagger 2중 blocks 구조를 순서대로 병합
+                    val allBlocks = lectureData.articles.flatMap { it.blocks }.sortedBy { it.orderIndex }
+
+                    // 💡 핵심: 찾아온 본문 블록 리스트를 문서 편집 프래그먼트에 바인딩하여 복원 완료!
+                    fetchedBlocks = allBlocks
+                    editFragment.restoreArticles(allBlocks)
+                    Log.d("REGISTER_DEBUG", "편집 화면 본문 복원 완료: ${allBlocks.size}개의 섹션")
+                } else {
+                    Log.e("REGISTER_DEBUG", "드래프트 본문 복구 조회 실패 코드: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<LectureDetailResponse>, t: Throwable) {
+                Log.e("REGISTER_DEBUG", "드래프트 본문 복구 네트워크 통신 오류")
+            }
+        })
     }
 
     // 로딩 상태를 관리하는 함수
@@ -128,12 +193,8 @@ class AddCourseActivity : AppCompatActivity() {
 
     // 강연 정보 생성 요청
     private fun startFullUploadAfterPermission() {
-        val createRequest = infoFragment.getLectureCreateRequest()
+        val createRequest = infoFragment.getLectureCreateRequest(pendingStatus) ?: return
 
-        if (createRequest == null) {
-            Toast.makeText(this, "정보 입력창이 준비되지 않았습니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
-            return
-        }
         if (createRequest.title.trim().isEmpty()) {
             Toast.makeText(this, "제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
             binding.btnSwitchInfo.performClick()
@@ -143,65 +204,52 @@ class AddCourseActivity : AppCompatActivity() {
         // --- [시작] 로딩 표시 ---
         setLoading(true)
 
-        RetrofitClient.service.createLecture(createRequest).enqueue(object : Callback<LectureCreateResponse> {
-            override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    // [Step 1] 로그를 통해 서버가 준 응답 전체를 확인합니다.
-                    Log.d("REGISTER_DEBUG", "서버 응답 성공: $responseBody")
+        if (isEdit && lectureId != -1L) {
+            // 💡 수정 시 LectureUpdateRequest 객체로 변환하여 전송
+            val updateRequest = LectureUpdateRequest(
+                title = createRequest.title,
+                lectureDate = createRequest.lectureDate,
+                location = createRequest.location,
+                lectureSummary = createRequest.lectureSummary,
+                lecturerName = createRequest.lecturerName,
+                topic = createRequest.topic,
+                status = createRequest.status,
+                tags = createRequest.tags
+            )
 
-                    // [Step 1 & 2] ID 추출 시도 (id 혹은 lectureId 필드명 불일치 체크)
-                    val lectureId = responseBody?.id
-
-                    if (lectureId != null) {
-                        Log.d("REGISTER_DEBUG", "추출된 ID: $lectureId")
-                        // 3. 편집 프래그먼트에서 섹션 데이터를 가져옵니다.
-                        val sections = editFragment.getSectionData()
-
-                        if (sections.isEmpty()) {
-                            // --- [수정 포인트] 섹션(내용)이 없으면 여기서 즉시 종료 ---
-                            // 내용(섹션)이 없는 경우: 여기서 바로 등록 완료 처리
-                            Log.d("REGISTER_DEBUG", "섹션이 비어있음. 강연 정보만 등록하고 종료합니다.")
-                            setLoading(false)
-                            Toast.makeText(
-                                this@AddCourseActivity,
-                                "강연 정보가 등록되었습니다.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            finish() // 강연 정보만 생성하고 바로 메인으로 돌아감
-                        } else {
-                            // 섹션이 있으면 기존대로 아티클 업로드 진행
-                            Log.d("REGISTER_DEBUG", "섹션 존재 (${sections.size}개). 아티클 업로드를 시작합니다.")
-                            uploadArticles(lectureId)
-                        }
+            // 💡 기존 드래프트 '수정' API 호출 파이프라인 작동
+            RetrofitClient.service.updateLecture(lectureId, updateRequest).enqueue(object : Callback<LectureCreateResponse> {
+                override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
+                    if (response.isSuccessful) {
+                        uploadVideoThenArticles(lectureId)
+                    } else {
+                        setLoading(false)
+                        Toast.makeText(this@AddCourseActivity, "강연 수정 실패 (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
                     }
-//                  val lectureId = response.body()?.id ?: return
-//                  uploadArticles(lectureId)
-                } else {
-                    // --- [실패] 로딩 해제 ---
-                    setLoading(false)
-                    Log.e("REGISTER_DEBUG", "ID 추출 실패! 서버 응답 모델(LectureCreateResponse)의 필드명을 확인하세요.")
-                    Toast.makeText(this@AddCourseActivity, "강연 생성 실패", Toast.LENGTH_SHORT).show()
                 }
-            }
 
-            override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
-                // --- [오류] 로딩 해제 ---
-                setLoading(false)
-                Log.e("REGISTER_DEBUG", "네트워크 실패: ${t.message}")
-                Toast.makeText(this@AddCourseActivity, "네트워크 오류", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
+                override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
+                    setLoading(false)
+                    Toast.makeText(this@AddCourseActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } else {
+            RetrofitClient.service.createLecture(createRequest).enqueue(object : Callback<LectureCreateResponse> {
+                override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
+                    if (response.isSuccessful) {
+                        response.body()?.id?.let { uploadVideoThenArticles(it) } ?: setLoading(false)
+                    } else {
+                        setLoading(false)
+                        Toast.makeText(this@AddCourseActivity, "강연 생성 실패 (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
-    private fun getRealPathFromURI(contentUri: Uri): String? {
-        val proj = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = contentResolver.query(contentUri, proj, null, null, null)
-        val columnIndex = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-        cursor?.moveToFirst()
-        val path = columnIndex?.let { cursor.getString(it) }
-        cursor?.close()
-        return path
+                override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
+                    setLoading(false)
+                    Toast.makeText(this@AddCourseActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     private fun getCompressedImageFile(uri: Uri): File? {
@@ -228,62 +276,105 @@ class AddCourseActivity : AppCompatActivity() {
         }
     }
 
-    // 문서 섹션들을 아티클로 등록
-    private fun uploadArticles(lectureId: Long) {
-        val sections = editFragment.getSectionData()
-        var completedCount = 0
+    // 강의 생성 시 비디오 추가
+    private fun uploadVideoThenArticles(currentLectureId: Long) {
+        // 정보 입력 프래그먼트의 영상 주소창 데이터를 조회합니다.
+        val videoUrlInput = infoFragment.view?.findViewById<android.widget.EditText>(R.id.et_video)?.text?.toString()?.trim() ?: ""
 
-        if (sections.isEmpty()) {
-            setLoading(false)
-            Toast.makeText(this, "강연 등록 완료!", Toast.LENGTH_SHORT).show()
-            finish()
+        // 만약 영상 링크를 입력하지 않았다면 2단계를 패스하고 바로 3단계 아티클 저장으로 순간 이동합니다.
+        if (videoUrlInput.isEmpty() || videoUrlInput == "-") {
+            syncArticlesState(currentLectureId)
             return
         }
 
-        sections.forEachIndexed { index, section ->
-            // JSON 데이터 생성 (String -> RequestBody)
-            val articleData = ArticleCreateRequest(
-                type = section.type,
-                textContent = if (section.type == "TEXT") section.content else null,
-                orderIndex = index
-            )
-            val json = Gson().toJson(articleData)
-            val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+        // 명세서 규격에 맞게 VideoRequest 스펙 빌드
+        val videoRequest = CreateVideoRequest(videoUrl = videoUrlInput, caption = "강연 영상")
 
-            // 이미지 파일 처리 (IMAGE 타입인 경우만)
-            var imagePart: MultipartBody.Part? = null
-            if (section.type == "IMAGE" && section.imageUri != null) {
-                val compressedFile = getCompressedImageFile(Uri.parse(section.imageUri!!))
-                if (compressedFile != null) {
-                    val fileRequestBody = compressedFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
-                    // 첫 번째 파라미터는 서버의 Key 값인 "image"
-                    imagePart = MultipartBody.Part.createFormData("image", compressedFile.name, fileRequestBody)
-                }
+        // 백엔드 2단계 API 호출 (POST /admin/lectures/{lectureId}/videos)
+        RetrofitClient.service.addVideo(currentLectureId, videoRequest).enqueue(object : Callback<VideoResponse> {
+            override fun onResponse(call: Call<VideoResponse>, response: Response<VideoResponse>) {
+                // 비디오 연동이 완수되면 (201 Created) 최종 3단계 아티클 저장망을 기동합니다.
+                syncArticlesState(currentLectureId)
             }
 
-            // 섹션별 아티클 등록 (POST /admin/lectures/{lectureId}/articles)
-            RetrofitClient.service.addArticle(lectureId, requestBody, imagePart).enqueue(object : Callback<Void> {
-                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                    completedCount++
-                    if (completedCount == sections.size) {
-                        // --- [최종 완료] 로딩 해제 ---
-                        setLoading(false)
-                        Toast.makeText(this@AddCourseActivity, "모든 내용이 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                }
+            override fun onFailure(call: Call<VideoResponse>, t: Throwable) {
+                // 비디오 추가 실패 시 유저 경험을 방해하지 않기 위해 로그만 남기고 아티클은 안전하게 저장하도록 포워딩합니다.
+                Log.e("VIDEO_UPLOAD_ERROR", "2단계 비디오 연동 실패: ${t.message}")
+                syncArticlesState(currentLectureId)
+            }
+        })
+    }
 
-                override fun onFailure(call: Call<Void>, t: Throwable) {
-                    completedCount++
-                    Log.e("API_ERROR", "섹션 ${index} 전송 실패: ${t.message}")
-                    if (completedCount == sections.size) {
-                        setLoading(false)
-                        Toast.makeText(this@AddCourseActivity, "일부 내용 전송에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                }
-            })
+    // 삭제 대기열(DELETE), 기존 수정 분기(PUT), 신규 삽입(POST) 통신망을 복합 결합하여 일괄 병렬 처리
+    private fun syncArticlesState(currentLectureId: Long) {
+        val currentSections = editFragment.getSectionData()
+
+        // 섹션이 없다면 굳이 서버 통신하지 않고 성공 처리
+        if (currentSections.isEmpty()) {
+            Toast.makeText(this@AddCourseActivity, "강의 저장 완료!", Toast.LENGTH_SHORT).show()
+            setLoading(false)
+            finish() // 여기서 종료!
+            return
         }
+
+        // 1. 모든 섹션을 서버가 원하는 blocks 리스트로 변환
+        val blocks = currentSections.mapIndexed { index, section ->
+            ArticleBlockRequest(
+                type = ArticleBlockType.valueOf(section.type), // 💡 String -> Enum 변환
+                orderIndex = index,
+                textContent = if (section.type == "TEXT") section.content else null,
+                clientImageKey = if (section.type == "IMAGE") "img_$index" else null
+            )
+        }
+
+        // 2. 서버가 요구하는 상위 객체(CreateArticleRequest) 생성
+        val requestData = CreateArticleRequest(
+            articleTitle = "강의 노트", // 또는 infoFragment에서 가져온 제목
+            author = "Admin",
+            blocks = blocks
+        )
+
+        // 3. JSON 변환
+        val requestJson = Gson().toJson(requestData)
+
+        // 4. 멀티파트 구성 (이미지가 있을 경우 추가)
+        val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
+        builder.addPart(
+            MultipartBody.Part.createFormData("request", null,
+                requestJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+        )
+
+        currentSections.forEachIndexed { index, section ->
+            if (section.type == "IMAGE" && section.imageUri != null) {
+                val file = getCompressedImageFile(Uri.parse(section.imageUri))
+                if (file != null) {
+                    // 중요: clientImageKey와 파일 파트 이름("img_0", "img_1"...)을 일치시킴
+                    builder.addPart(
+                        MultipartBody.Part.createFormData("img_$index", file.name,
+                            file.asRequestBody("image/jpeg".toMediaTypeOrNull()))
+                    )
+                }
+            }
+        }
+
+        // 5. 전송 (RetrofitClient.service의 createArticle 파라미터를 List<MultipartBody.Part>로 설정)
+        setLoading(true)
+        RetrofitClient.service.createArticle(currentLectureId, builder.build().parts).enqueue(object : Callback<ArticleResponse> {
+            override fun onResponse(call: Call<ArticleResponse>, response: Response<ArticleResponse>) {
+                setLoading(false)
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddCourseActivity, "저장 완료!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@AddCourseActivity, "내용 저장 실패 (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
+                }
+                finish() // 성공/실패 여부와 관계없이 강의 추가 창은 닫음
+            }
+            override fun onFailure(call: Call<ArticleResponse>, t: Throwable) {
+                setLoading(false)
+                Log.e("UPLOAD_ERROR", "통신 오류: ${t.message}")
+                finish() // 네트워크 문제로 내용만 못 저장한 것이므로 창은 닫음
+            }
+        })
     }
 
     // --- 버튼 클릭 시 Fragment의 함수를 호출하는 로직 ---

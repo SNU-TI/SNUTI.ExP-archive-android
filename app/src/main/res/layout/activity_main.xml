@@ -53,9 +53,10 @@
     <!-- 메인 강좌 영역 -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_container"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="16dp"
         app:layout_constraintTop_toBottomOf="@id/btn_profile"
         app:layout_constraintBottom_toTopOf="@id/layout_search_group"
         app:layout_constraintStart_toStartOf="parent"

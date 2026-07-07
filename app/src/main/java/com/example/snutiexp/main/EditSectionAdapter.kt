@@ -9,7 +9,8 @@ import com.example.snutiexp.databinding.ItemEditSectionBinding
 
 class EditSectionAdapter(
     private val items: MutableList<EditSection>,
-    private val onImageClick: (Int) -> Unit
+    private val onImageClick: (Int) -> Unit,
+    private val onSectionRemoved: (EditSection) -> Unit
 ) : RecyclerView.Adapter<EditSectionAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemEditSectionBinding) :
@@ -36,6 +37,11 @@ class EditSectionAdapter(
                 etSectionContent.visibility = android.view.View.VISIBLE
                 ivSectionImage.visibility = android.view.View.GONE
 
+                val oldWatcher = etSectionContent.tag as? android.text.TextWatcher
+                if (oldWatcher != null) {
+                    etSectionContent.removeTextChangedListener(oldWatcher)
+                }
+
                 // 데이터 복원 (리사이클러뷰 재사용 시 텍스트 보존)
                 etSectionContent.setText(item.content)
 
@@ -51,6 +57,7 @@ class EditSectionAdapter(
                     }
                     override fun afterTextChanged(s: android.text.Editable?) {}
                 }
+
                 etSectionContent.addTextChangedListener(textWatcher)
                 etSectionContent.tag = textWatcher
             } else {
@@ -86,6 +93,8 @@ class EditSectionAdapter(
                         .setTitle("섹션 삭제") // 다이얼로그 제목
                         .setMessage("Section ${currentPos + 1}을 정말로 삭제하시겠습니까?\n작성된 내용이 모두 사라집니다.") // 다이얼로그 본문
                         .setPositiveButton("삭제") { dialog, _ ->
+                            val targetItem = items[currentPos]
+                            onSectionRemoved(targetItem)
                             // 사용자가 '삭제'를 눌렀을 때만 실제 데이터 제거 및 화면 갱신을 진행합니다.
                             items.removeAt(currentPos)
                             notifyItemRemoved(currentPos)

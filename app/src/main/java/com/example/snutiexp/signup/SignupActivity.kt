@@ -20,7 +20,7 @@ class SignupActivity : AppCompatActivity() {
 
         // 1. Retrofit 설정
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://43.201.109.122:8080/")
+            .baseUrl("http://43.200.176.8:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
