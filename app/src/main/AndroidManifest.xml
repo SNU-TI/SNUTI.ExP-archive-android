@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".auth.LoginActivity"
             android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
@@ -53,8 +53,18 @@
         </activity>
 
         <activity
-            android:name=".signup.SignupActivity"
+            android:name=".auth.SignupActivity"
             android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".auth.EmailVerificationActivity"
+            android:exported="false" >
+        </activity>
+
+        <activity
+            android:name=".auth.PasswordResetActivity"
+            android:exported="false" >
         </activity>
 
         <activity

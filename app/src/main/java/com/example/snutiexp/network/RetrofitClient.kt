@@ -1,7 +1,7 @@
 package com.example.snutiexp.network
 
 import android.content.Context
-import com.example.snutiexp.signup.AuthService
+import com.example.snutiexp.auth.AuthService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

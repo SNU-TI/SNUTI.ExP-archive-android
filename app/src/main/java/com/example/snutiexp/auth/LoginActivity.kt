@@ -1,5 +1,6 @@
-package com.example.snutiexp.login
+package com.example.snutiexp.auth
 
+import android.R
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
@@ -8,8 +9,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.snutiexp.databinding.ActivityLoginBinding
 import com.example.snutiexp.main.MainActivity
+import com.example.snutiexp.model.LoginRequest
+import com.example.snutiexp.model.LoginResponse
 import com.example.snutiexp.network.RetrofitClient
-import com.example.snutiexp.signup.SignupActivity
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,12 +50,20 @@ class LoginActivity : AppCompatActivity() {
             updateCheckboxUI()
         }
 
+        // [비밀번호 찾기] 버튼 기능 추가
+        binding.tvFindPassword.setOnClickListener {
+            val intent = Intent(this, EmailVerificationActivity::class.java).apply {
+                putExtra("PURPOSE", "PASSWORD_RESET") // 💡 핵심: 비밀번호 리셋 목적 플래그 전달
+            }
+            startActivity(intent)
+        }
+
         // [회원가입하러 가기] 버튼 기능
         binding.btnGoSignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }
 
-        // [로그인] 버튼 기능 추가
+        // [로그인] 버튼 기능
         binding.btnLogin.setOnClickListener {
             val email = binding.etLoginId.text.toString()
             val password = binding.etLoginPw.text.toString()
@@ -66,7 +76,8 @@ class LoginActivity : AppCompatActivity() {
 
             // 서버에 로그인 요청 전송
             val loginRequest = LoginRequest(email, password)
-            RetrofitClient.authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+            RetrofitClient.authService.login(loginRequest).enqueue(object :
+                Callback<LoginResponse> {
                 override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                     if (response.isSuccessful) {
                         val loginResponse = response.body()
@@ -134,9 +145,9 @@ class LoginActivity : AppCompatActivity() {
     // 체크박스 아이콘 토글 헬퍼 함수
     private fun updateCheckboxUI() {
         if (isAutoLoginChecked) {
-            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.checkbox_on_background, 0, 0, 0)
+            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(R.drawable.checkbox_on_background, 0, 0, 0)
         } else {
-            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.checkbox_off_background, 0, 0, 0)
+            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(R.drawable.checkbox_off_background, 0, 0, 0)
         }
     }
 

@@ -2,7 +2,7 @@ package com.example.snutiexp.network
 
 import android.content.Context
 import android.content.Intent
-import com.example.snutiexp.login.LoginActivity
+import com.example.snutiexp.auth.LoginActivity
 import okhttp3.Interceptor
 import okhttp3.Response
 
