@@ -52,20 +52,31 @@ class InfoInputFragment : Fragment() {
     }
 
     // 드래프트 기본 정보 입력창 원상 복원 구역
-    fun restoreDraftData(title: String?, lecturer: String?, date: String?, topic: String?, location: String?, summary: String?) {
+    fun restoreDraftData(
+        title: String?,
+        lecturer: String?,
+        date: String?,
+        topic: String?,
+        location: String?,
+        summary: String?,
+        video: String? = null
+    ) {
         val currentBinding = _binding ?: return
-        currentBinding.etTitle.setText(title ?: "")
-        currentBinding.etSpeaker.setText(lecturer ?: "")
+
+        currentBinding.etTitle.setText(title.orEmpty())
+        currentBinding.etSpeaker.setText(lecturer.orEmpty())
 
         val displayDate = if (date?.contains("T") == true) {
             date.replace("T", " ").substringBeforeLast(":")
         } else {
-            date ?: ""
+            date.orEmpty()
         }
+
         currentBinding.etDate.setText(displayDate)
-        currentBinding.etSubject.setText(topic ?: "")
-        currentBinding.etLocation.setText(location ?: "")
-        currentBinding.etSummary.setText(summary ?: "")
+        currentBinding.etSubject.setText(topic.orEmpty())
+        currentBinding.etLocation.setText(location.orEmpty())
+        currentBinding.etSummary.setText(summary.orEmpty())
+        currentBinding.etVideo.setText(video.orEmpty())
     }
 
     // 새로운 태그를 생성하여 FlexboxLayout에 추가하는 함수

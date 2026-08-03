@@ -12,65 +12,105 @@ import com.example.snutiexp.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Intent
 
 class LectureDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLectureDetailBinding
     private lateinit var detailAdapter: LectureDetailAdapter
+    private var lectureId: Long = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLectureDetailBinding.inflate(layoutInflater)
+
+        binding =
+            ActivityLectureDetailBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
 
-        // 뒤로가기 버튼 기능 구현
+        // 1. 이전 화면에서 강의 ID를 먼저 받음
+        lectureId =
+            intent.getLongExtra("LECTURE_ID", -1L)
+
+        // 2. 강의 ID가 없으면 화면 종료
+        if (lectureId == -1L) {
+            Toast.makeText(
+                this,
+                "올바르지 않은 강좌입니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            finish()
+            return
+        }
+
+        // 3. 뒤로가기 버튼
         binding.btnBack.setOnClickListener {
-            finish() // 현재 액티비티를 종료하고 이전 화면(메인)으로 돌아감
-        }
-
-        // 관리자 계정일 때 강의 수정 버튼 가시화
-        val isAdminUser = checkUserAdminStatus()
-        if (isAdminUser) {
-            binding.btnEditLecture.visibility = View.VISIBLE
-        } else {
-            binding.btnEditLecture.visibility = View.GONE
-        }
-
-        // 강의 수정 버튼 클릭 리스너 설정 (추후 가공할 액티비티 연결 등 확장 구역)
-        binding.btnEditLecture.setOnClickListener {
-            Toast.makeText(this, "강의 수정 모드로 진입합니다.", Toast.LENGTH_SHORT).show()
-            // val intent = Intent(this, EditCourseActivity::class.java)
-            // intent.putExtra("LECTURE_ID", intent.getLongExtra("LECTURE_ID", -1))
-            // startActivity(intent)
-        }
-
-        // 하단 동적 섹션(텍스트/이미지)을 위한 리사이클러뷰 설정
-        detailAdapter = LectureDetailAdapter(emptyList())
-        binding.rvDetailContents.apply {
-            adapter = detailAdapter
-            layoutManager = LinearLayoutManager(this@LectureDetailActivity)
-            isNestedScrollingEnabled = false // 스크롤 충돌 방지
-
-            addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
-                override fun getItemOffsets(
-                    outRect: android.graphics.Rect,
-                    view: android.view.View,
-                    parent: androidx.recyclerview.widget.RecyclerView,
-                    state: androidx.recyclerview.widget.RecyclerView.State
-                ) {
-                    // 모든 아이템의 하단에 간격 추가
-                    outRect.bottom = 40 // 이 값을 조절해서 간격을 더 넓히거나 좁힐 수 있습니다.
-                }
-            })
-        }
-
-        val lectureId = intent.getLongExtra("LECTURE_ID", -1)
-        if (lectureId != -1L) {
-            fetchLectureDetail(lectureId)
-        } else {
-            Toast.makeText(this, "올바르지 않은 강좌입니다.", Toast.LENGTH_SHORT).show()
             finish()
         }
+
+        // 4. 관리자일 때만 수정 버튼 표시
+        val isAdminUser = checkUserAdminStatus()
+
+        binding.btnEditLecture.visibility =
+            if (isAdminUser) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+
+        // 5. 수정 버튼 클릭
+        binding.btnEditLecture.setOnClickListener {
+            val editIntent =
+                Intent(
+                    this,
+                    AddCourseActivity::class.java
+                ).apply {
+                    putExtra("MODE", "EDIT")
+                    putExtra("LECTURE_ID", lectureId)
+                }
+
+            Toast.makeText(
+                this,
+                "전달하는 강의 ID: $lectureId",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            startActivity(editIntent)
+        }
+
+        // 6. RecyclerView 설정
+        detailAdapter =
+            LectureDetailAdapter(emptyList())
+
+        binding.rvDetailContents.apply {
+            adapter = detailAdapter
+
+            layoutManager =
+                LinearLayoutManager(
+                    this@LectureDetailActivity
+                )
+
+            isNestedScrollingEnabled = false
+
+            addItemDecoration(
+                object :
+                    androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+
+                    override fun getItemOffsets(
+                        outRect: android.graphics.Rect,
+                        view: android.view.View,
+                        parent: androidx.recyclerview.widget.RecyclerView,
+                        state: androidx.recyclerview.widget.RecyclerView.State
+                    ) {
+                        outRect.bottom = 40
+                    }
+                }
+            )
+        }
+
+        // 7. 서버에서 강의 상세 조회
+        fetchLectureDetail(lectureId)
     }
 
     // SharedPreferences에 저장된 관리자 플래그를 불러오는 헬퍼 함수

@@ -14,12 +14,16 @@ import com.example.snutiexp.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.example.snutiexp.model.LectureListItemResponse
 
 class MainLectureListFragment : Fragment() {
     private var _binding: FragmentMainListBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var lectureAdapter: LectureAdapter
+
+    private var allLectures =
+        mutableListOf<LectureListItemResponse>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,34 +70,60 @@ class MainLectureListFragment : Fragment() {
 
         RetrofitClient.service.getLectures(page = 0, size = 20, sort = "id,desc")
             .enqueue(object : Callback<LectureListResponse> {
-            override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
-                binding.swipeRefreshLayout.isRefreshing = false
-                if (response.isSuccessful) {
-                    val newItems = response.body()?.content ?: emptyList()
+                override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                    if (response.isSuccessful) {
+                        val newItems = response.body()?.content ?: emptyList()
+                        allLectures.clear()
+                        allLectures.addAll(newItems)
 
-                    if (newItems.isEmpty()) {
-                        binding.layoutEmpty.visibility = View.VISIBLE
-                        binding.rvLectures.visibility = View.GONE
+                        if (newItems.isEmpty()) {
+                            binding.layoutEmpty.visibility = View.VISIBLE
+                            binding.rvLectures.visibility = View.GONE
+                        } else {
+                            binding.layoutEmpty.visibility = View.GONE
+                            binding.rvLectures.visibility = View.VISIBLE
+                            lectureAdapter.updateList(newItems)
+                        }
                     } else {
-                        binding.layoutEmpty.visibility = View.GONE
-                        binding.rvLectures.visibility = View.VISIBLE
-                        lectureAdapter.updateList(newItems)
+                        Log.e("API_ERROR", "Status Code: ${response.code()}")
+                        Log.e("API_ERROR", "Error Body: ${response.errorBody()?.string()}")
+                        Toast.makeText(requireContext(), "강좌 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Log.e("API_ERROR", "Status Code: ${response.code()}")
-                    Log.e("API_ERROR", "Error Body: ${response.errorBody()?.string()}")
-                    Toast.makeText(requireContext(), "강좌 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                    Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                    Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+    fun searchLecture(keyword: String) {
+        val trimmedKeyword = keyword.trim()
+
+        val filteredList =
+            if (trimmedKeyword.isBlank()) {
+                allLectures
+            } else {
+                allLectures.filter { lecture ->
+                    lecture.title.contains(
+                        trimmedKeyword,
+                        ignoreCase = true
+                    )
                 }
             }
 
-            override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
-                binding.swipeRefreshLayout.isRefreshing = false
-                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
-                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
+        lectureAdapter.updateList(filteredList)
 
+        if (filteredList.isEmpty()) {
+            binding.layoutEmpty.visibility = View.VISIBLE
+            binding.rvLectures.visibility = View.GONE
+        } else {
+            binding.layoutEmpty.visibility = View.GONE
+            binding.rvLectures.visibility = View.VISIBLE
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

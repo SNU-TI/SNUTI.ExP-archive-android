@@ -25,17 +25,20 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
+import com.example.snutiexp.model.LectureDetailResponse
+
 
 class AddCourseActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddCourseBinding
+    private var isEditMode: Boolean = false
+    private var editingLectureId: Long = -1L
 
     private val infoFragment = InfoInputFragment()
     private val editFragment = DocumentEditFragment()
 
     private var pendingStatus: String = "DRAFT"
 
-    private var isEdit: Boolean = false
-    private var lectureId: Long = -1L
+
 
     private var fetchedBlocks: List<ArticleBlockResponse>? = null
     private val requestPermissionLauncher = registerForActivityResult(
@@ -56,18 +59,33 @@ class AddCourseActivity : AppCompatActivity() {
         binding = ActivityAddCourseBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        val mode = intent.getStringExtra("MODE")
+        val isDraftEdit = intent.getBooleanExtra("IS_EDIT", false)
+
+        isEditMode = mode == "EDIT" || isDraftEdit
+
+        editingLectureId =
+            intent.getLongExtra("LECTURE_ID", -1L)
+
+
+
         // 초기 Fragment 설정 (태그도 추후 추가해야 함)
         supportFragmentManager.beginTransaction()
             .add(R.id.course_frame_container, infoFragment, "InfoInputFragment")
             .add(R.id.course_frame_container, editFragment, "DocumentEditFragment")
             .hide(editFragment) // 편집창은 일단 숨김
             .commit()
-
+//  Fragment가 생성된 뒤 기존 데이터 불러오기
+        binding.root.post {
+            if (isEditMode && editingLectureId != -1L) {
+                fetchLectureForEdit(editingLectureId)
+                fetchAndRestoreArticles(editingLectureId)
+            }
+        }
         // 편집 복원 분기 시점 제어
-        isEdit = intent.getBooleanExtra("IS_EDIT", false)
-        lectureId = intent.getLongExtra("LECTURE_ID", -1)
 
-        if (isEdit) {
+        if (isDraftEdit) {
             window.decorView.post {
                 infoFragment.restoreDraftData(
                     title = intent.getStringExtra("EDIT_TITLE"),
@@ -75,11 +93,12 @@ class AddCourseActivity : AppCompatActivity() {
                     date = intent.getStringExtra("EDIT_DATE"),
                     topic = intent.getStringExtra("EDIT_TOPIC"),
                     location = intent.getStringExtra("EDIT_LOCATION"),
-                    summary = intent.getStringExtra("EDIT_SUMMARY")
+                    summary = intent.getStringExtra("EDIT_SUMMARY"),
+                    video = intent.getStringExtra("EDIT_VIDEO")
                 )
             }
-            if (lectureId != -1L) {
-                fetchAndRestoreArticles(lectureId)
+            if (editingLectureId != -1L) {
+                fetchAndRestoreArticles(editingLectureId)
             }
         }
 
@@ -94,12 +113,22 @@ class AddCourseActivity : AppCompatActivity() {
                 .setPositiveButton("강의 게시") { dialog, _ ->
                     dialog.dismiss()
                     pendingStatus = "PUBLISHED"
-                    checkPermissionAndUpload()
+
+                    if (isEditMode) {
+                        updateLecture()
+                    } else {
+                        checkPermissionAndUpload()
+                    }
                 }
                 .setNegativeButton("임시저장") { dialog, _ ->
                     dialog.dismiss()
                     pendingStatus = "DRAFT"
-                    checkPermissionAndUpload()
+
+                    if (isEditMode) {
+                        updateLecture()
+                    } else {
+                        checkPermissionAndUpload()
+                    }
                 }
                 .setNeutralButton("취소") { dialog, _ ->
                     dialog.dismiss()
@@ -131,6 +160,220 @@ class AddCourseActivity : AppCompatActivity() {
 
         // 뒤로가기 버튼
         binding.btnBack.setOnClickListener { finish() }
+    }
+    //강의수정요청
+    private fun updateLecture() {
+        if (editingLectureId == -1L) {
+            Toast.makeText(
+                this,
+                "수정할 강의 ID가 없습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        checkPermissionAndUpload()
+    }
+    private fun checkPermissionAndUpload() {
+        val permission =
+            if (android.os.Build.VERSION.SDK_INT >=
+                android.os.Build.VERSION_CODES.TIRAMISU
+            ) {
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                permission
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            startFullUploadAfterPermission()
+        } else {
+            requestPermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun startFullUploadAfterPermission() {
+        val createRequest =
+            infoFragment.getLectureCreateRequest(pendingStatus)
+                ?: return
+
+        if (createRequest.title.trim().isEmpty()) {
+            Toast.makeText(
+                this,
+                "제목을 입력해주세요.",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            binding.btnSwitchInfo.performClick()
+            return
+        }
+
+        setLoading(true)
+
+        if (isEditMode && editingLectureId != -1L) {
+            val updateRequest = LectureUpdateRequest(
+                title = createRequest.title,
+                lectureDate = createRequest.lectureDate,
+                location = createRequest.location,
+                lectureSummary = createRequest.lectureSummary,
+                lecturerName = createRequest.lecturerName,
+                topic = createRequest.topic,
+                status = createRequest.status,
+                tags = createRequest.tags
+            )
+
+            RetrofitClient.service
+                .updateLecture(
+                    editingLectureId,
+                    updateRequest
+                )
+                .enqueue(
+                    object : Callback<LectureCreateResponse> {
+
+                        override fun onResponse(
+                            call: Call<LectureCreateResponse>,
+                            response: Response<LectureCreateResponse>
+                        ) {
+                            if (response.isSuccessful) {
+                                uploadVideoThenArticles(
+                                    editingLectureId
+                                )
+                            } else {
+                                setLoading(false)
+
+                                Toast.makeText(
+                                    this@AddCourseActivity,
+                                    "강연 수정 실패 (코드: ${response.code()})",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        override fun onFailure(
+                            call: Call<LectureCreateResponse>,
+                            t: Throwable
+                        ) {
+                            setLoading(false)
+
+                            Toast.makeText(
+                                this@AddCourseActivity,
+                                "네트워크 오류: ${t.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
+        } else {
+            RetrofitClient.service
+                .createLecture(createRequest)
+                .enqueue(
+                    object : Callback<LectureCreateResponse> {
+
+                        override fun onResponse(
+                            call: Call<LectureCreateResponse>,
+                            response: Response<LectureCreateResponse>
+                        ) {
+                            if (response.isSuccessful) {
+                                val newLectureId =
+                                    response.body()?.id
+
+                                if (newLectureId != null) {
+                                    uploadVideoThenArticles(
+                                        newLectureId
+                                    )
+                                } else {
+                                    setLoading(false)
+
+                                    Toast.makeText(
+                                        this@AddCourseActivity,
+                                        "생성된 강의 ID가 없습니다.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } else {
+                                setLoading(false)
+
+                                Toast.makeText(
+                                    this@AddCourseActivity,
+                                    "강연 생성 실패 (코드: ${response.code()})",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        override fun onFailure(
+                            call: Call<LectureCreateResponse>,
+                            t: Throwable
+                        ) {
+                            setLoading(false)
+
+                            Toast.makeText(
+                                this@AddCourseActivity,
+                                "네트워크 오류: ${t.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
+        }
+    }
+    private fun fetchLectureForEdit(id: Long) {
+        RetrofitClient.service
+            .getLectureDetail(id)
+            .enqueue(
+                object : Callback<LectureDetailResponse> {
+
+                    override fun onResponse(
+                        call: Call<LectureDetailResponse>,
+                        response: Response<LectureDetailResponse>
+                    ) {
+                        if (!response.isSuccessful) {
+                            Toast.makeText(
+                                this@AddCourseActivity,
+                                "강의 정보를 불러오지 못했습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return
+                        }
+
+                        val lecture = response.body()
+
+                        if (lecture == null) {
+                            Toast.makeText(
+                                this@AddCourseActivity,
+                                "강의 정보가 비어 있습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return
+                        }
+
+                        infoFragment.restoreDraftData(
+                            title = lecture.title,
+                            lecturer = lecture.lecturerName,
+                            date = lecture.lectureDate,
+                            topic = lecture.topic,
+                            location = lecture.location,
+                            summary = lecture.lectureSummary,
+//                            video = lecture.videoUrl
+                        )
+                    }
+
+                    override fun onFailure(
+                        call: Call<LectureDetailResponse>,
+                        t: Throwable
+                    ) {
+                        Toast.makeText(
+                            this@AddCourseActivity,
+                            "강의 정보를 불러오지 못했습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            )
     }
 
     // 수정 모드 진입 시 본문 편집창(DocumentEditFragment)에 기존 섹션들을 리스토어하기 위해 상세 데이터를 땡겨오는 통신 파이프라인
@@ -172,85 +415,7 @@ class AddCourseActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPermissionAndUpload() {
-        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        }
 
-        when {
-            ContextCompat.checkSelfPermission(this, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
-                // 이미 권한이 있는 경우
-                startFullUploadAfterPermission()
-            }
-            else -> {
-                // 권한 요청
-                requestPermissionLauncher.launch(permission)
-            }
-        }
-    }
-
-    // 강연 정보 생성 요청
-    private fun startFullUploadAfterPermission() {
-        val createRequest = infoFragment.getLectureCreateRequest(pendingStatus) ?: return
-
-        if (createRequest.title.trim().isEmpty()) {
-            Toast.makeText(this, "제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
-            binding.btnSwitchInfo.performClick()
-            return
-        }
-
-        // --- [시작] 로딩 표시 ---
-        setLoading(true)
-
-        if (isEdit && lectureId != -1L) {
-            // 💡 수정 시 LectureUpdateRequest 객체로 변환하여 전송
-            val updateRequest = LectureUpdateRequest(
-                title = createRequest.title,
-                lectureDate = createRequest.lectureDate,
-                location = createRequest.location,
-                lectureSummary = createRequest.lectureSummary,
-                lecturerName = createRequest.lecturerName,
-                topic = createRequest.topic,
-                status = createRequest.status,
-                tags = createRequest.tags
-            )
-
-            // 💡 기존 드래프트 '수정' API 호출 파이프라인 작동
-            RetrofitClient.service.updateLecture(lectureId, updateRequest).enqueue(object : Callback<LectureCreateResponse> {
-                override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
-                    if (response.isSuccessful) {
-                        uploadVideoThenArticles(lectureId)
-                    } else {
-                        setLoading(false)
-                        Toast.makeText(this@AddCourseActivity, "강연 수정 실패 (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
-                    setLoading(false)
-                    Toast.makeText(this@AddCourseActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            RetrofitClient.service.createLecture(createRequest).enqueue(object : Callback<LectureCreateResponse> {
-                override fun onResponse(call: Call<LectureCreateResponse>, response: Response<LectureCreateResponse>) {
-                    if (response.isSuccessful) {
-                        response.body()?.id?.let { uploadVideoThenArticles(it) } ?: setLoading(false)
-                    } else {
-                        setLoading(false)
-                        Toast.makeText(this@AddCourseActivity, "강연 생성 실패 (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<LectureCreateResponse>, t: Throwable) {
-                    setLoading(false)
-                    Toast.makeText(this@AddCourseActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
-    }
 
     private fun getCompressedImageFile(uri: Uri): File? {
         try {

@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.snutiexp.R
 import com.example.snutiexp.databinding.ActivityMainBinding // 바인딩 클래스 임포트
 import com.example.snutiexp.network.RetrofitClient
+import androidx.core.widget.addTextChangedListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,10 +39,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 메인 리스트 프래그먼트를 처음에 띄웁니다.
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, MainLectureListFragment()) // ActivityMain의 컨테이너 ID 확인 필요
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(
+                    R.id.main_container,
+                    MainLectureListFragment()
+                )
+                .commit()
+        }
 
+
+// 검색창 입력 내용을 강의 목록 Fragment에 전달
+        binding.etSearch.addTextChangedListener { editable ->
+            val keyword = editable?.toString().orEmpty()
+
+            val currentFragment =
+                supportFragmentManager.findFragmentById(R.id.main_container)
+
+            if (currentFragment is MainLectureListFragment) {
+                currentFragment.searchLecture(keyword)
+            }
+        }
         // 관리자 버튼
         binding.btnAdd.setOnClickListener { view ->
             showAdminPopupMenu(view)
@@ -109,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                         // 드래프트 보기 클릭 시: 드래프트 전용 프래그먼트로 화면을 갈아끼우고 플래그를 true로 스위칭합니다.
                         supportFragmentManager.beginTransaction()
                             .replace(R.id.main_container, DraftLectureListFragment()) // 추후 구현할 드래프트 프래그먼트 가정
-                        .commit()
+                            .commit()
                         isCurrentScreenDraft = true
                         updateTitle()
                         Toast.makeText(this, "드래프트 목록으로 전환되었습니다.", Toast.LENGTH_SHORT).show()
@@ -138,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                             .replace(R.id.main_container, MainLectureListFragment())
                             .commit()
                         isCurrentScreenDraft = false
+                        binding.etSearch.setText("")
                         updateTitle()
                         Toast.makeText(this, "기존 강좌 목록 화면으로 복귀했습니다.", Toast.LENGTH_SHORT).show()
                         true
