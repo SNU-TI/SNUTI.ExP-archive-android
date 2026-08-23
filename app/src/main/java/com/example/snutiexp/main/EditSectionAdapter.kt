@@ -66,8 +66,11 @@ class EditSectionAdapter(
                 ivSectionImage.visibility = android.view.View.VISIBLE
 
                 // 1. 이미지 표시 로직 (URI가 있으면 이미지를, 없으면 기본 배경/아이콘)
-                if (item.imageUri != null) {
-                    ivSectionImage.setImageURI(Uri.parse(item.imageUri))
+                if (!item.imageUri.isNullOrEmpty()) {
+                    // Glide를 사용하면 서버의 http 웹 URL이든 로컬 file/content URI든 모두 알아서 로드해줍니다.
+                    com.bumptech.glide.Glide.with(ivSectionImage.context)
+                        .load(item.imageUri)
+                        .into(ivSectionImage)
                 } else {
                     // 이미지가 없을 때 보여줄 기본 이미지나 색상
                     ivSectionImage.setImageResource(R.drawable.ic_btn_add)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.snutiexp.databinding.ActivityLectureDetailBinding
@@ -19,6 +20,17 @@ class LectureDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLectureDetailBinding
     private lateinit var detailAdapter: LectureDetailAdapter
     private var lectureId: Long = -1L
+
+    // 수정 화면에서 돌아올 때 결과를 처리할 런처 등록
+    private val editLectureLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // 수정 완료 후 AddCourseActivity에서 돌아왔을 때 (RESULT_OK이거나 작업 완료 시)
+        // 화면 데이터를 최신 상태로 새로고침합니다.
+        if (lectureId != -1L) {
+            fetchLectureDetail(lectureId)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,22 +73,14 @@ class LectureDetailActivity : AppCompatActivity() {
 
         // 5. 수정 버튼 클릭
         binding.btnEditLecture.setOnClickListener {
-            val editIntent =
-                Intent(
-                    this,
-                    AddCourseActivity::class.java
-                ).apply {
-                    putExtra("MODE", "EDIT")
-                    putExtra("LECTURE_ID", lectureId)
-                }
+            val editIntent = Intent(this, AddCourseActivity::class.java).apply {
+                putExtra("MODE", "EDIT")
+                putExtra("LECTURE_ID", lectureId)
+            }
 
-            Toast.makeText(
-                this,
-                "전달하는 강의 ID: $lectureId",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "전달하는 강의 ID: $lectureId", Toast.LENGTH_SHORT).show()
 
-            startActivity(editIntent)
+            editLectureLauncher.launch(editIntent)
         }
 
         // 6. RecyclerView 설정

@@ -11,7 +11,8 @@ data class ArticleBlockRequest(
     val type: ArticleBlockType, // String 대신 Enum 사용
     val orderIndex: Int,
     val textContent: String? = null,
-    val clientImageKey: String? = null
+    val clientImageKey: String? = null,
+    val existingBlockId: Long? = null
 )
 
 // 서버의 ArticleResponse 대응 (상세 조회 등에 사용)

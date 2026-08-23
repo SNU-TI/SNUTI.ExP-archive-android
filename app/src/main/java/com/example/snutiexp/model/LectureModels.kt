@@ -51,7 +51,9 @@ data class LectureListItemResponse(
     val location: String?,
     val lecturerName: String?,
     val topic: String?,
-    val lectureSummary: String?
+    val lectureSummary: String?,
+    @com.google.gson.annotations.SerializedName("tags")
+    val tags: List<TagResponse>?
 )
 
 // 상세 조회 모델

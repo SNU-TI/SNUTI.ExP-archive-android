@@ -46,4 +46,19 @@
         app:layout_constraintTop_toTopOf="@id/tv_lecture_title"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <TextView
+        android:id="@+id/tv_lecture_tags"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="#태그1 #태그2 #태그3 #태그4 #태그5"
+        android:textSize="12sp"
+        android:textColor="#4A90E2"
+        android:layout_marginTop="6dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        app:layout_constraintTop_toBottomOf="@id/tv_lecture_info"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

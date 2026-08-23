@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.snutiexp.databinding.FragmentMainListBinding
@@ -24,6 +25,17 @@ class MainLectureListFragment : Fragment() {
 
     private var allLectures =
         mutableListOf<LectureListItemResponse>()
+
+    // 현재 사용자가 입력한 검색어 상태를 기억할 변수 추가
+    private var currentSearchKeyword: String = ""
+
+    // 상세 화면에서 돌아올 때 결과를 처리할 런처 등록
+    private val detailLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // 상세 화면(LectureDetailActivity)이나 수정 화면에서 돌아왔을 때 데이터 갱신
+        loadLectures()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +66,8 @@ class MainLectureListFragment : Fragment() {
                 val intent = android.content.Intent(context, LectureDetailActivity::class.java).apply {
                     putExtra("LECTURE_ID", clickedItem.id)
                 }
-                context.startActivity(intent)
+                // startActivity 대신 런처로 호출하여 돌아왔을 때의 흐름 제어
+                detailLauncher.launch(intent)
             }
         }
         binding.rvLectures.apply {
@@ -73,17 +86,24 @@ class MainLectureListFragment : Fragment() {
                 override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
                     binding.swipeRefreshLayout.isRefreshing = false
                     if (response.isSuccessful) {
-                        val newItems = response.body()?.content ?: emptyList()
+                        val body = response.body()
+
+                        val newItems = body?.content ?: emptyList()
                         allLectures.clear()
                         allLectures.addAll(newItems)
 
-                        if (newItems.isEmpty()) {
-                            binding.layoutEmpty.visibility = View.VISIBLE
-                            binding.rvLectures.visibility = View.GONE
+                        // 💡 4. 데이터를 불러온 뒤, 만약 검색 중이었다면 기존 검색어를 유지하여 필터링 적용!
+                        if (currentSearchKeyword.isNotBlank()) {
+                            searchLecture(currentSearchKeyword)
                         } else {
-                            binding.layoutEmpty.visibility = View.GONE
-                            binding.rvLectures.visibility = View.VISIBLE
-                            lectureAdapter.updateList(newItems)
+                            if (newItems.isEmpty()) {
+                                binding.layoutEmpty.visibility = View.VISIBLE
+                                binding.rvLectures.visibility = View.GONE
+                            } else {
+                                binding.layoutEmpty.visibility = View.GONE
+                                binding.rvLectures.visibility = View.VISIBLE
+                                lectureAdapter.updateList(newItems)
+                            }
                         }
                     } else {
                         Log.e("API_ERROR", "Status Code: ${response.code()}")
@@ -100,6 +120,8 @@ class MainLectureListFragment : Fragment() {
             })
     }
     fun searchLecture(keyword: String) {
+        // 검색할 때마다 키워드를 전역 변수에 저장
+        currentSearchKeyword = keyword
         val trimmedKeyword = keyword.trim()
 
         val filteredList =

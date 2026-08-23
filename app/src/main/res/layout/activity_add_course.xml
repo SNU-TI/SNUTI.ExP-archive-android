@@ -56,6 +56,24 @@
         app:tint="#FFFFFF"
         tools:visibility="visible"/>
 
+    <!-- ★ 문서 편집 시에만 나타날 임시저장 버튼 ★ -->
+    <ImageButton
+        android:id="@+id/btn_draft"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_white_circle"
+        android:elevation="4dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_archive"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tv_add_title"
+        app:layout_constraintEnd_toStartOf="@id/btn_done"
+        app:layout_constraintTop_toTopOf="@id/tv_add_title"
+        app:tint="#333333"
+        tools:visibility="visible"
+        android:contentDescription="임시저장"/>
+
     <!-- 프래그먼트 컨테이너 (여기에 정보입력/문서편집 화면이 번갈아 뜸) -->
     <FrameLayout
         android:id="@+id/course_frame_container"

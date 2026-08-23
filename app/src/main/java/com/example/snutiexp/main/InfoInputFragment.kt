@@ -2,23 +2,34 @@ package com.example.snutiexp.main
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.snutiexp.R
 import com.example.snutiexp.databinding.FragmentInfoInputBinding
 import com.example.snutiexp.model.LectureCreateRequest
-import com.google.android.flexbox.FlexboxLayout
+import com.example.snutiexp.model.TagResponse
+import com.example.snutiexp.network.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.Calendar
 
 class InfoInputFragment : Fragment() {
     private var _binding: FragmentInfoInputBinding? = null
     private val binding get() = _binding!!
+
+    // 서버에서 가져온 전체 추천 태그 목록
+    private val allRecommendedTags = mutableListOf<TagResponse>()
+    // 사용자가 현재 선택/추가한 태그 이름 목록 (중복 방지 및 순서 유지)
+    private val selectedTagNames = mutableSetOf<String>()
+
+    private lateinit var selectedAdapter: TagHorizontalAdapter
+    private lateinit var recommendedAdapter: TagHorizontalAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,23 +43,116 @@ class InfoInputFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecyclerViews()
+
         // 날짜 EditText 클릭 시 달력 띄우기
         binding.etDate.setOnClickListener {
             showDateTimePicker()
         }
 
-        // 태그 입력창 엔터 키 리스너 추가
-        binding.etTagInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val tagText = binding.etTagInput.text.toString().trim()
+        // 태그 입력 영역 토글 버튼 (+ 버튼)
+        var isTagInputVisible = false
+        binding.btnToggleTagInput.setOnClickListener {
+            isTagInputVisible = !isTagInputVisible
+            binding.layoutTagInputContainer.visibility = if (isTagInputVisible) View.VISIBLE else View.GONE
+            if (isTagInputVisible) {
+                // 열렸을 때 (위쪽 화살표 또는 닫기 아이콘)
+                binding.btnToggleTagInput.setImageResource(R.drawable.ic_arrow_up) // 또는 ic_close 등
+            } else {
+                // 닫혔을 때 (아래쪽 화살표 또는 + 아이콘)
+                binding.btnToggleTagInput.setImageResource(R.drawable.ic_arrow_down) // 또는 ic_btn_add
+            }
 
-                if (tagText.isNotEmpty()) {
-                    addTagToLayout(tagText) // 태그 생성 함수 호출
-                    binding.etTagInput.setText("") // 입력창 비우기
-                }
-                true
-            } else false
+            if (isTagInputVisible && allRecommendedTags.isEmpty()) {
+                fetchServerTags()
+            }
         }
+
+        // '추가하기' 버튼 클릭 시 직접 입력한 태그 추가
+        binding.btnAddTag.setOnClickListener {
+            val inputText = binding.etTagSearch.text.toString().trim()
+            if (inputText.isNotEmpty()) {
+                val cleanName = if (inputText.startsWith("#")) inputText.substring(1) else inputText
+                if (selectedTagNames.add(cleanName)) {
+                    refreshSelectedTagsUI()
+                    refreshRecommendedTagsUI()
+                }
+                binding.etTagSearch.setText("")
+            }
+        }
+
+        // 태그 검색창에 글자를 입력할 때마다 추천 목록 실시간 갱신
+        binding.etTagSearch.addTextChangedListener { editable ->
+            refreshRecommendedTagsUI()
+        }
+    }
+    // 선택된 태그 RecyclerView 초기화
+    private fun setupRecyclerViews() {
+        selectedAdapter = TagHorizontalAdapter(
+            items = selectedTagNames.toList(),
+            isSelectedMode = true,
+            onItemClick = { tagName ->
+                selectedTagNames.remove(tagName)
+                refreshSelectedTagsUI()
+                refreshRecommendedTagsUI()
+            }
+        )
+        binding.recyclerSelectedTags.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = selectedAdapter
+        }
+
+        // 추천 태그 RecyclerView 초기화
+        recommendedAdapter = TagHorizontalAdapter(
+            items = emptyList(),
+            isSelectedMode = false,
+            selectedChecker = { tagName -> selectedTagNames.contains(tagName) },
+            onItemClick = { tagName ->
+                if (selectedTagNames.contains(tagName)) {
+                    selectedTagNames.remove(tagName)
+                } else {
+                    selectedTagNames.add(tagName)
+                }
+                refreshSelectedTagsUI()
+                refreshRecommendedTagsUI()
+            }
+        )
+        binding.recyclerRecommendedTags.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = recommendedAdapter
+        }
+    }
+
+    // 서버로부터 전체 태그 목록을 불러오는 함수
+    private fun fetchServerTags() {
+        RetrofitClient.service.getTags().enqueue(object : Callback<List<TagResponse>> {
+            override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    allRecommendedTags.clear()
+                    allRecommendedTags.addAll(response.body()!!)
+                    refreshRecommendedTagsUI()
+                }
+            }
+            override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
+                // 네트워크 오류 시 조용히 처리하거나 토스트
+            }
+        })
+    }
+
+    // 태그 목록 (강좌 포함)
+    private fun refreshSelectedTagsUI() {
+        selectedAdapter.updateItems(selectedTagNames.toList())
+    }
+
+    // 태그 목록 (전체)
+    private fun refreshRecommendedTagsUI() {
+        val keyword = binding.etTagSearch.text.toString().trim()
+        val filtered = if (keyword.isEmpty()) {
+            allRecommendedTags.map { it.name }
+        } else {
+            allRecommendedTags.filter { it.name.contains(keyword, ignoreCase = true) }.map { it.name }
+        }
+        recommendedAdapter.updateItems(filtered)
     }
 
     // 드래프트 기본 정보 입력창 원상 복원 구역
@@ -59,7 +163,8 @@ class InfoInputFragment : Fragment() {
         topic: String?,
         location: String?,
         summary: String?,
-        video: String? = null
+        video: String? = null,
+        tags: List<String>? = null
     ) {
         val currentBinding = _binding ?: return
 
@@ -77,39 +182,16 @@ class InfoInputFragment : Fragment() {
         currentBinding.etLocation.setText(location.orEmpty())
         currentBinding.etSummary.setText(summary.orEmpty())
         currentBinding.etVideo.setText(video.orEmpty())
-    }
 
-    // 새로운 태그를 생성하여 FlexboxLayout에 추가하는 함수
-    private fun addTagToLayout(text: String) {
-        val tagView = TextView(requireContext()).apply {
-            val formattedText = if (text.startsWith("#")) text else "#$text"
-            this.text = formattedText
-
-            // bg_tag_item은 이전에 만든 drawable 리소스입니다.
-            setBackgroundResource(R.drawable.bg_tag_item)
-            setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6))
-            textSize = 13f
-            setTextColor(Color.parseColor("#333333"))
-
-            val layoutParams = FlexboxLayout.LayoutParams(
-                FlexboxLayout.LayoutParams.WRAP_CONTENT,
-                FlexboxLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                marginEnd = dpToPx(8)
-                bottomMargin = dpToPx(8)
-            }
-            this.layoutParams = layoutParams
-
-            // 태그 클릭 시 삭제 기능
-            setOnClickListener {
-                binding.flexboxTags.removeView(this)
-            }
+        // 기존 태그가 있다면 복원
+        if (!tags.isNullOrEmpty()) {
+            selectedTagNames.clear()
+            selectedTagNames.addAll(tags)
+            refreshSelectedTagsUI()
         }
-
-        binding.flexboxTags.addView(tagView)
     }
 
-    // dp 단위를 px로 변환해주는 유틸리티 (추가됨)
+    // dp 단위를 px로 변환해주는 유틸리티
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
@@ -148,7 +230,7 @@ class InfoInputFragment : Fragment() {
         ).show()
     }
 
-    // 제목과 설명을 가져오는 함수 예시
+    // 서버로 보낼 LectureCreateRequest 객체 생성 함수
     fun getLectureCreateRequest(targetStatus: String): LectureCreateRequest? {
         val currentBinding = _binding ?: return null
 
@@ -170,20 +252,7 @@ class InfoInputFragment : Fragment() {
             }
         }
 
-        // 레이아웃에 렌더링된 태그 뷰들로부터 # 부호를 떼어낸 순수 문자열 배열을 빌드
-        val tagList = mutableListOf<String>()
-        val count = currentBinding.flexboxTags.childCount
-        for (i in 0 until count) {
-            val view = currentBinding.flexboxTags.getChildAt(i)
-            if (view is TextView) {
-                val rawText = view.text.toString()
-                val cleanText = if (rawText.startsWith("#")) rawText.substring(1) else rawText
-                if (cleanText.isNotEmpty()) {
-                    tagList.add(cleanText)
-                }
-            }
-        }
-
+        // 사용자가 선택/입력한 태그 이름 리스트를 그대로 반환
         return LectureCreateRequest(
             title = currentBinding.etTitle.text.toString(),
             lectureSummary = currentBinding.etSummary.text.toString(), // 요약/설명 입력창 ID
@@ -192,7 +261,7 @@ class InfoInputFragment : Fragment() {
             lecturerName = currentBinding.etSpeaker.text.toString(),  // 강연자 입력창 ID
             topic = currentBinding.etSubject.text.toString(),            // 주제 입력창 ID
             status = targetStatus,                                    // 초기 상태
-            tags = tagList
+            tags = selectedTagNames.toList()
         )
     }
 

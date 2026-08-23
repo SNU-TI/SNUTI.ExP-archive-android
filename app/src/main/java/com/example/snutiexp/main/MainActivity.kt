@@ -9,13 +9,10 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.snutiexp.R
-import com.example.snutiexp.databinding.ActivityMainBinding // 바인딩 클래스 임포트
-import com.example.snutiexp.network.RetrofitClient
+import com.example.snutiexp.databinding.ActivityMainBinding
 import androidx.core.widget.addTextChangedListener
 
 class MainActivity : AppCompatActivity() {
-
-    // 바인딩 객체 선언 (나중에 초기화하겠다는 의미)
     private lateinit var binding: ActivityMainBinding
 
     // 현재 띄워진 화면 상태를 추적하는 동적 플래그 변수 (false:초기값/true:드래프트 강좌)
@@ -84,17 +81,10 @@ class MainActivity : AppCompatActivity() {
             if (isKeyboardVisible) {
                 // [키보드가 떴을 때] 키보드 높이만큼 검색 그룹을 위로 올림
                 binding.layoutSearchGroup.translationY = -keyboardHeight.toFloat()
-
-                // 디자인 변경: 구분선과 태그 영역 노출
-                binding.searchDivider.visibility = View.VISIBLE
-                binding.layoutTagArea.visibility = View.VISIBLE
             } else {
                 // [키보드가 닫혔을 때] 원래 위치로 복귀 및 포커스 해제
                 binding.layoutSearchGroup.translationY = 0f
                 binding.etSearch.clearFocus()
-
-                binding.searchDivider.visibility = View.GONE
-                binding.layoutTagArea.visibility = View.GONE
             }
             insets
         }

@@ -63,7 +63,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:layout="@layout/fragment_main_list" />
 
-    <!-- layout_search_group의 배경을 흰색 라운드 처리하여 전체가 하나로 보이게 함 -->
     <LinearLayout
         android:id="@+id/layout_search_group"
         android:layout_width="match_parent"
@@ -74,21 +73,22 @@
         android:background="@drawable/bg_search_group"
         android:elevation="8dp"
         android:padding="4dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
         app:layout_constraintBottom_toBottomOf="parent" >
 
-        <!-- 1. 검색 영역 (배경 없이 투명하게) -->
+        <!-- 검색 입력 영역 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp"
-            android:background="@drawable/bg_inner_search_bar"
-            android:focusable="false"
-            android:focusableInTouchMode="false">
+            android:background="@drawable/bg_inner_search_bar">
 
-            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_search" />
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="검색 아이콘" />
+
             <EditText
                 android:id="@+id/et_search"
                 android:layout_width="0dp"
@@ -106,49 +106,10 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/ic_mic"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:clickable="true" />
-        </LinearLayout>
-
-        <!-- 2. 구분선 (틀에 갇힌 느낌을 없애는 핵심) -->
-        <View
-            android:id="@+id/search_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginHorizontal="16dp"
-            android:background="#EEEEEE"
-            android:visibility="gone"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
-
-        <!-- 3. 태그 영역 (배경 없이 일체화) -->
-        <LinearLayout
-            android:id="@+id/layout_tag_area"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="12dp"
-            android:visibility="gone"
-            android:focusable="false"
-            android:focusableInTouchMode="false">
-
-            <ImageView
-                android:id="@+id/btn_add_tag"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_btn_add"
+                android:contentDescription="음성 검색"
                 android:clickable="true"
-                android:focusable="false"
-                android:focusableInTouchMode="false" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_tag_item"
-                android:layout_marginStart="8dp"
-                android:focusable="false"
-                android:focusableInTouchMode="false" />
+                android:focusable="true" />
         </LinearLayout>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

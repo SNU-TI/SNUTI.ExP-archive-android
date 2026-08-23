@@ -2,6 +2,7 @@ package com.example.snutiexp.main
 
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.snutiexp.databinding.ItemLectureBinding
@@ -9,7 +10,7 @@ import com.example.snutiexp.model.LectureListItemResponse
 
 class LectureAdapter(
     private var items: List<LectureListItemResponse>,
-    private val onItemClick: ((LectureListItemResponse, Int) -> Unit)? = null // 외부 주입용 클릭 람다 함수 추가
+    private val onItemClick: ((LectureListItemResponse, Int) -> Unit)? = null
 ) : RecyclerView.Adapter<LectureAdapter.ViewHolder>() {
 
     // 각 아이템의 뷰를 보관하는 홀더입니다.
@@ -50,7 +51,17 @@ class LectureAdapter(
                 rawDate
             }
 
-            // 4. 아이템 클릭 시 상세 화면 이동 (추후 구현)
+            // 4. 태그 표시 설정 (한 줄 말줄임 적용)
+            val tagList = item.tags
+            if (!tagList.isNullOrEmpty()) {
+                // 태그 이름을 #태그 형태로 띄어쓰기하여 연결
+                tvLectureTags.text = tagList.joinToString(" ") { "#${it.name}" }
+                tvLectureTags.visibility = View.VISIBLE
+            } else {
+                tvLectureTags.visibility = View.GONE
+            }
+
+            // 5. 아이템 클릭 시 상세 화면 이동
             root.setOnClickListener {view ->
                 if (onItemClick != null) {
                     onItemClick.invoke(item, holder.bindingAdapterPosition)

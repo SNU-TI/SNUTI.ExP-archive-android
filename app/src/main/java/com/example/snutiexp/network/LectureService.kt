@@ -17,6 +17,19 @@ interface LectureService {
         @Body request: CreateVideoRequest
     ): Call<VideoResponse> // 응답 객체 반환
 
+    // 비디오 수정 (PUT /admin/videos/{videoId})
+    @PUT("/admin/videos/{videoId}")
+    fun updateVideo(
+        @Path("videoId") videoId: Long,
+        @Body request: UpdateVideoRequest
+    ): Call<VideoResponse>
+
+    // 비디오 삭제 (DELETE /admin/videos/{videoId})
+    @DELETE("/admin/videos/{videoId}")
+    fun deleteVideo(
+        @Path("videoId") videoId: Long
+    ): Call<Void>
+
     // 강연 수정(POST /admin/lectures/{lectureId})
     @PATCH("/admin/lectures/{lectureId}")
     fun updateLecture(

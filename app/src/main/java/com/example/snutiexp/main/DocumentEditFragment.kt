@@ -1,4 +1,4 @@
-package com.example.snutiexp.main // 본인의 패키지명과 맞는지 확인하세요
+package com.example.snutiexp.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import com.example.snutiexp.databinding.FragmentDocumentEditBinding
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.snutiexp.model.ArticleBlockResponse
+import com.example.snutiexp.model.ArticleResponse
 
 class DocumentEditFragment : Fragment() {
     private var _binding: FragmentDocumentEditBinding? = null
@@ -83,13 +84,12 @@ class DocumentEditFragment : Fragment() {
     }
 
     // 기존 아티클 본문 섹션 데이터 원상 복원 구역
-    fun restoreArticles(blocks: List<ArticleBlockResponse>) {
+    fun restoreArticles(blocks: List<ArticleBlockResponse>, targetArticleId: Long? = null) {
         if (_binding == null || !::sectionAdapter.isInitialized) {
             // 💡 뷰가 아직 안 그려졌다면 백업소에 임시 보관하고 탈출!
             pendingBlocks = blocks
             return
         }
-
         // 이미 복구가 완료되었다면 현재 상태 유지
         if (isRestored) {
             android.util.Log.d("REGISTER_DEBUG", "이미 복원이 완료된 상태이므로 데이터 유지를 위해 복원 통지를 생략합니다.")
@@ -105,8 +105,9 @@ class DocumentEditFragment : Fragment() {
                 type = block.type.name, // "TEXT" 또는 "IMAGE"
                 content = block.textContent ?: "", // 기존 입력했던 텍스트 복구
                 imageUri = block.imageUrl, // 기존 업로드했던 이미지 경로 복구
-                articleId = block.id,  // 💡 진짜 서버 아티클 ID 세팅
-                isNew = false          // 💡 서버에서 온 것이므로 false
+                existingBlockId = block.id, // 💡 서버 블록의 고유 ID를 existingBlockId에 정확히 매핑
+                isNew = false,          // 💡 서버에서 온 것이므로 false
+                articleId = targetArticleId
             )
             sectionList.add(restoredSection)
         }
@@ -143,9 +144,44 @@ class DocumentEditFragment : Fragment() {
         return sectionList
     }
 
-    // 액티비티에서 지워야 할 것들 지우는 함수
-    fun getDeletedArticleIds(): List<Long> {
-        return deletedArticleIds
+    // 아티클 리스트를 통째로 받아 각 섹션에 아티클 ID(articleId)를 매핑해주는 함수
+    fun restoreArticlesWithArticleId(articles: List<ArticleResponse>) {
+        if (_binding == null || !::sectionAdapter.isInitialized) {
+            // 뷰가 아직 안 그려졌다면 블록들을 백업해두고 리턴 (기존 pendingBlocks 활용)
+            pendingBlocks = articles.flatMap { it.blocks }.sortedBy { it.orderIndex }
+            return
+        }
+        if (isRestored) {
+            return
+        }
+
+        sectionList.clear()
+        deletedArticleIds.clear()
+
+        articles.forEach { article ->
+            val parentArticleId = article.id // 진짜 아티클 고유 ID
+
+            article.blocks.forEach { block ->
+                val restoredSection = EditSection(
+                    id = block.id.toInt(),
+                    type = block.type.name,
+                    content = block.textContent ?: "",
+                    imageUri = block.imageUrl,
+                    articleId = parentArticleId,
+                    existingBlockId = block.id,
+                    isNew = false
+                )
+                sectionList.add(restoredSection)
+            }
+        }
+
+        isRestored = true
+
+        binding.rvSections.post {
+            if (::sectionAdapter.isInitialized) {
+                sectionAdapter.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onDestroyView() {
