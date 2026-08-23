@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.snutiexp.databinding.ActivityEmailVerificationBinding
 import com.example.snutiexp.model.PasswordResetVerifyRequest
+import com.example.snutiexp.model.SendEmailCodeRequest
 import com.example.snutiexp.model.VerifyEmailCodeRequest
 import com.example.snutiexp.network.RetrofitClient
 import retrofit2.Call
@@ -84,10 +85,14 @@ class EmailVerificationActivity : AppCompatActivity() {
     private fun sendEmailCode(email: String) {
         val call = if (verificationPurpose == "PASSWORD_RESET") {
             // 비밀번호 리셋용 전송 API (필요한 Request 형태에 맞게 조정)
-            RetrofitClient.authService.sendPasswordResetCode(com.example.snutiexp.model.PasswordResetSendRequest(email))
+            RetrofitClient.authService.sendPasswordResetCode(
+                com.example.snutiexp.model.PasswordResetSendRequest(email)
+            )
         } else {
-            // 회원가입용 토큰 기반 이메일 전송 API
-            RetrofitClient.authService.sendEmailVerification()
+            // 회원가입용 이메일 전송 API (서버 규격에 맞춰 SendEmailCodeRequest로 이메일 바디 전달)
+            RetrofitClient.authService.sendEmailVerification(
+                SendEmailCodeRequest(email = email)
+            )
         }
 
         call.enqueue(object : Callback<Void> {
@@ -95,7 +100,12 @@ class EmailVerificationActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     Toast.makeText(this@EmailVerificationActivity, "인증 코드가 전송되었습니다.", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@EmailVerificationActivity, "인증 코드 전송에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.errorBody()?.string() ?: ""
+                    val message = when {
+                        errorBody.contains("이미 가입된") || response.code() == 400 -> "이미 가입된 이메일입니다."
+                        else -> "인증 코드 전송에 실패했습니다."
+                    }
+                    Toast.makeText(this@EmailVerificationActivity, message, Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -107,9 +117,10 @@ class EmailVerificationActivity : AppCompatActivity() {
 
     // 서버로 인증 코드 검증 요청 함수
     private fun verifyEmailCode(code: String) {
+        val email = binding.etEmailInput.text.toString().trim()
+
         if (verificationPurpose == "PASSWORD_RESET") {
             // 비밀번호 리셋 검증 로직
-            val email = binding.etEmailInput.text.toString().trim()
             val request = PasswordResetVerifyRequest(email = email, code = code)
             RetrofitClient.authService.verifyPasswordResetCode(request).enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
@@ -132,12 +143,19 @@ class EmailVerificationActivity : AppCompatActivity() {
             })
         } else {
             // 회원가입 인증 검증 로직
-            val request = VerifyEmailCodeRequest(code = code)
+            val request = VerifyEmailCodeRequest(email = email, code = code)
+
             RetrofitClient.authService.verifyEmailCode(request).enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {
-                        Toast.makeText(this@EmailVerificationActivity, "이메일 인증이 완료되었습니다!", Toast.LENGTH_SHORT).show()
-                        setResult(Activity.RESULT_OK)
+                        Toast.makeText(this@EmailVerificationActivity, "이메일 인증 성공!", Toast.LENGTH_SHORT).show()
+
+                        // 인증 성공 후, 이메일과 코드를 담아 최종 비밀번호 설정 화면(SignupActivity)으로 이동
+                        val intent = Intent(this@EmailVerificationActivity, SignupActivity::class.java).apply {
+                            putExtra("EMAIL", email)
+                            putExtra("CODE", code)
+                        }
+                        startActivity(intent)
                         finish()
                     } else {
                         // 인증 실패 시 강제 퇴장시키지 않고 문구만 출력하여 재시도 가능하게 함

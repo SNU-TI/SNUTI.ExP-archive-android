@@ -18,9 +18,11 @@ interface AuthService {
     ): Call<LoginResponse>
 
 
-    // --- [2. 이메일 인증 관련 (로그인 상태 - AuthInterceptor가 토큰 자동 첨부)] ---
+    // --- [2. 이메일 인증 관련 (회원가입용)] ---
     @POST("/auth/email/send")
-    fun sendEmailVerification(): Call<Void>
+    fun sendEmailVerification(
+        @Body request: SendEmailCodeRequest
+    ): Call<Void>
 
     @POST("/auth/email/verify")
     fun verifyEmailCode(

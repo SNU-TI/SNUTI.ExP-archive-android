@@ -33,7 +33,13 @@ data class ChangePasswordRequest(
 
 // --- [이메일 인증 (로그인 상태)] ---
 data class VerifyEmailCodeRequest(
+    @SerializedName("email") val email: String,
     @SerializedName("code") val code: String
+)
+
+// --- [이메일 인증 요청 (회원가입용/공통)] ---
+data class SendEmailCodeRequest(
+    @SerializedName("email") val email: String
 )
 
 // --- [비밀번호 재설정 (로그아웃/비밀번호 찾기 상태)] ---

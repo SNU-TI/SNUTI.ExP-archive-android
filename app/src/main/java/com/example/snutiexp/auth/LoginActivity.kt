@@ -60,7 +60,10 @@ class LoginActivity : AppCompatActivity() {
 
         // [회원가입하러 가기] 버튼 기능
         binding.btnGoSignup.setOnClickListener {
-            startActivity(Intent(this, SignupActivity::class.java))
+            val intent = Intent(this, EmailVerificationActivity::class.java).apply {
+                putExtra("PURPOSE", "SIGN_UP") // 회원가입 목적 플래그 전달
+            }
+            startActivity(intent)
         }
 
         // [로그인] 버튼 기능
