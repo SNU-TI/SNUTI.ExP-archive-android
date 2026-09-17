@@ -62,15 +62,19 @@ class LectureAdapter(
             }
 
             // 5. 아이템 클릭 시 상세 화면 이동
-            root.setOnClickListener {view ->
-                if (onItemClick != null) {
-                    onItemClick.invoke(item, holder.bindingAdapterPosition)
-                } else {
-                    val context = view.context
-                    val intent = Intent(context, LectureDetailActivity::class.java).apply {
-                        putExtra("LECTURE_ID", item.id)
+            root.setOnClickListener { view ->
+                val position = holder.adapterPosition
+
+                if (position != RecyclerView.NO_POSITION) {
+                    if (onItemClick != null) {
+                        onItemClick.invoke(item, position)
+                    } else {
+                        val context = view.context
+                        val intent = Intent(context, LectureDetailActivity::class.java).apply {
+                            putExtra("LECTURE_ID", item.id)
+                        }
+                        context.startActivity(intent)
                     }
-                    context.startActivity(intent)
                 }
             }
         }

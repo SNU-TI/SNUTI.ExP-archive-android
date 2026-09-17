@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SNUTI ExP"
+rootProject.name = "SNUTI.ExP()"
 include(":app")
  

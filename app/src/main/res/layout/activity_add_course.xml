@@ -11,8 +11,8 @@
 
     <ImageButton
         android:id="@+id/btn_back"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/bg_white_circle"
@@ -20,7 +20,6 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back"
         app:tint="@color/black"
-        android:elevation="4dp"
         android:foreground="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="뒤로가기"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,9 +40,9 @@
     <!-- ★ 문서 편집 시에만 나타날 파란 체크 버튼 ★ -->
     <ImageButton
         android:id="@+id/btn_done"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginEnd="20dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
         android:background="@drawable/bg_blue_circle"
         android:backgroundTint="#4A89FF"
         android:elevation="4dp"
@@ -59,8 +58,8 @@
     <!-- ★ 문서 편집 시에만 나타날 임시저장 버튼 ★ -->
     <ImageButton
         android:id="@+id/btn_draft"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/bg_white_circle"
         android:elevation="4dp"

@@ -26,9 +26,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-
+        android:layout_marginStart="4dp"
         android:text="이메일 주소"
         style="@style/BodyText"
+
 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_login_title" />
@@ -39,7 +40,7 @@
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
 
-        android:background="@android:drawable/editbox_background"
+        android:background="@drawable/bg_setting_card"
         android:hint="example@snu.ac.kr"
         android:inputType="textEmailAddress"
         android:paddingHorizontal="12dp"
@@ -55,6 +56,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="4dp"
 
         android:text="비밀번호"
         style="@style/BodyText"
@@ -78,7 +80,7 @@
             android:id="@+id/et_login_pw"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@android:drawable/editbox_background"
+            android:background="@drawable/bg_setting_card"
             android:hint="Password"
             
             android:gravity="center_vertical"
@@ -108,53 +110,54 @@
         android:background="?attr/selectableItemBackground"
         android:padding="4dp"/>
 
-<!--    자동 로그인 체크박스 추가 -->
-    <TextView
-        android:id="@+id/tv_auto_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-
-        android:text="자동 로그인"
-        android:textSize="10sp"
-        android:textColor="#757575"
-
-        android:drawableStart="@android:drawable/checkbox_off_background"
-        android:drawablePadding="4dp"
-        android:gravity="center_vertical"
-
-        app:layout_constraintStart_toStartOf="@id/til_login_pw"
-        app:layout_constraintTop_toBottomOf="@id/tv_find_password"
-
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:padding="4dp"/>
-
 <!--    login-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:backgroundTint="#333333"
         android:text="로그인"
         android:textColor="@color/white"
         android:textStyle="bold"
         app:cornerRadius="12dp"  app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_auto_login" />
+        app:layout_constraintTop_toBottomOf="@id/tv_find_password" />
 
-    <TextView
-        android:id="@+id/tv_or"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/layout_or"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="———— 또는 ————"
-        android:textColor="#BCBCBC"
+        android:layout_marginHorizontal="42dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_login" />
+        app:layout_constraintTop_toBottomOf="@id/btn_login">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="#BCBCBC" />
+
+        <TextView
+            android:id="@+id/tv_or"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:text="또는"
+            android:textColor="#BCBCBC"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="#BCBCBC" />
+
+    </LinearLayout>
 
 
     <com.google.android.material.button.MaterialButton
@@ -166,6 +169,7 @@
         android:text="Apple로 계속하기"
         android:textColor="@color/black"
         android:textAllCaps="false"
+        android:visibility="gone"
         app:cornerRadius="12dp"
         app:strokeColor="#E0E0E0"
         app:icon="@drawable/ic_apple"
@@ -174,7 +178,7 @@
         app:iconSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_or" />
+        app:layout_constraintTop_toBottomOf="@id/layout_or" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_google"
@@ -185,6 +189,7 @@
         android:text="Google로 계속하기"
         android:textColor="@color/black"
         android:textAllCaps="false"
+        android:visibility="gone"
         app:cornerRadius="12dp"
         app:strokeColor="#E0E0E0"
         app:icon="@drawable/ic_google"
@@ -200,13 +205,13 @@
         android:id="@+id/btn_go_signup"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginTop="28dp"
         android:backgroundTint="#E0E0E0"
         android:text="회원가입"
         style="@style/BodyText"
 
         app:cornerRadius="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_or"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

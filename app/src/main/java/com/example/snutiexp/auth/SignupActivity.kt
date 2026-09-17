@@ -50,8 +50,8 @@ class SignupActivity : AppCompatActivity() {
         // [회원가입] 실행 버튼
         binding.btnSignupSubmit.setOnClickListener {
             val email = binding.etSignupEmail.text.toString().trim()
-            val password = binding.etSignupEmail.text.toString().trim()
-            val passwordConfirm = binding.etSignupPwConfirm.text.toString().trim()
+            val password = binding.etSignupPw.text.toString()
+            val passwordConfirm = binding.etSignupPwConfirm.text.toString()
 
             // [자체 검증 1] 빈 칸 체크
             if (email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {

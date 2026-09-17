@@ -1,10 +1,13 @@
 package com.example.snutiexp.main
 
-import android.net.Uri
-import com.example.snutiexp.R
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.snutiexp.databinding.ItemEditSectionBinding
 
 class EditSectionAdapter(
@@ -18,7 +21,9 @@ class EditSectionAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemEditSectionBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
+            LayoutInflater.from(parent.context),
+            parent,
+            false
         )
         return ViewHolder(binding)
     }
@@ -26,89 +31,163 @@ class EditSectionAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-        holder.binding.etSectionContent.tag = null
-
         holder.binding.apply {
-            // 섹션 번호 설정 (예: Section 1, Section 2)
+
+            // 섹션 번호
             tvSectionNumber.text = "Section ${position + 1}"
 
+            // RecyclerView 재활용 시 기존 TextWatcher 제거
+            val oldWatcher = etSectionContent.tag as? TextWatcher
+            if (oldWatcher != null) {
+                etSectionContent.removeTextChangedListener(oldWatcher)
+            }
+            etSectionContent.tag = null
+
             if (item.type == "TEXT") {
-                // 텍스트 섹션일 때: 입력창은 보이고, 이미지 영역은 숨김
-                etSectionContent.visibility = android.view.View.VISIBLE
-                ivSectionImage.visibility = android.view.View.GONE
 
-                val oldWatcher = etSectionContent.tag as? android.text.TextWatcher
-                if (oldWatcher != null) {
-                    etSectionContent.removeTextChangedListener(oldWatcher)
-                }
+                // -------------------------
+                // TEXT SECTION
+                // -------------------------
 
-                // 데이터 복원 (리사이클러뷰 재사용 시 텍스트 보존)
+                etSectionContent.visibility = View.VISIBLE
+
+                // 이미지 관련 View는 모두 숨김
+                ivSectionImage.visibility = View.GONE
+                btnAddImage.visibility = View.GONE
+
+                // 이전 이미지 로딩 제거
+                Glide.with(ivSectionImage.context)
+                    .clear(ivSectionImage)
+
+                // 저장되어 있던 내용 복원
                 etSectionContent.setText(item.content)
 
-                // 실시간 데이터 저장 로직
-                val textWatcher = object : android.text.TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        // 사용자가 입력한 내용을 즉시 데이터 모델에 반영
+                val textWatcher = object : TextWatcher {
+
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {
+                    }
+
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {
                         val currentPos = holder.adapterPosition
+
                         if (currentPos != RecyclerView.NO_POSITION) {
                             items[currentPos].content = s.toString()
                         }
                     }
-                    override fun afterTextChanged(s: android.text.Editable?) {}
+
+                    override fun afterTextChanged(s: Editable?) {
+                    }
                 }
 
                 etSectionContent.addTextChangedListener(textWatcher)
                 etSectionContent.tag = textWatcher
-            } else {
-                // 이미지 섹션일 때: 입력창은 숨기고, 이미지 영역을 보임
-                etSectionContent.visibility = android.view.View.GONE
-                ivSectionImage.visibility = android.view.View.VISIBLE
 
-                // 1. 이미지 표시 로직 (URI가 있으면 이미지를, 없으면 기본 배경/아이콘)
+            } else {
+
+                // -------------------------
+                // IMAGE SECTION
+                // -------------------------
+
+                etSectionContent.visibility = View.GONE
+
                 if (!item.imageUri.isNullOrEmpty()) {
-                    // Glide를 사용하면 서버의 http 웹 URL이든 로컬 file/content URI든 모두 알아서 로드해줍니다.
-                    com.bumptech.glide.Glide.with(ivSectionImage.context)
+
+                    // 이미지가 있는 경우
+                    ivSectionImage.visibility = View.VISIBLE
+                    btnAddImage.visibility = View.GONE
+
+                    // 이전에 설정됐을 수 있는 배경 제거
+                    ivSectionImage.background = null
+
+                    Glide.with(ivSectionImage.context)
                         .load(item.imageUri)
                         .into(ivSectionImage)
-                } else {
-                    // 이미지가 없을 때 보여줄 기본 이미지나 색상
-                    ivSectionImage.setImageResource(R.drawable.ic_btn_add)
-                    ivSectionImage.setBackgroundColor(android.graphics.Color.LTGRAY)
-                }
 
-                // 2. 이미지 영역 클릭 시 갤러리 호출
-                ivSectionImage.setOnClickListener {
-                    onImageClick(holder.adapterPosition)
+                    // 이미지 자체를 누르면 다시 이미지 선택 가능
+                    ivSectionImage.setOnClickListener {
+                        val currentPos = holder.adapterPosition
+
+                        if (currentPos != RecyclerView.NO_POSITION) {
+                            onImageClick(currentPos)
+                        }
+                    }
+
+                } else {
+
+                    // 이미지가 없는 경우
+                    Glide.with(ivSectionImage.context)
+                        .clear(ivSectionImage)
+
+                    ivSectionImage.setImageDrawable(null)
+                    ivSectionImage.visibility = View.GONE
+
+                    // "+ 이미지 추가" 버튼 표시
+                    btnAddImage.visibility = View.VISIBLE
+
+                    btnAddImage.setOnClickListener {
+                        val currentPos = holder.adapterPosition
+
+                        if (currentPos != RecyclerView.NO_POSITION) {
+                            onImageClick(currentPos)
+                        }
+                    }
                 }
             }
 
-            // 삭제 버튼 클릭 리스너
+            // -------------------------
+            // SECTION DELETE
+            // -------------------------
+
             btnDeleteSection.setOnClickListener {
-                // 안전하게 현재 위치를 가져와서 삭제
+
                 val currentPos = holder.adapterPosition
+
                 if (currentPos != RecyclerView.NO_POSITION) {
-                    // 다이얼로그를 띄우기 위해 버튼(View)이 속한 컨텍스트(Context)를 가져옵니다.
+
                     val context = holder.itemView.context
 
-                    // 1. 삭제 확인 알림창(AlertDialog) 생성
-                    androidx.appcompat.app.AlertDialog.Builder(context)
-                        .setTitle("섹션 삭제") // 다이얼로그 제목
-                        .setMessage("Section ${currentPos + 1}을 정말로 삭제하시겠습니까?\n작성된 내용이 모두 사라집니다.") // 다이얼로그 본문
+                    AlertDialog.Builder(context)
+                        .setTitle("섹션 삭제")
+                        .setMessage(
+                            "Section ${currentPos + 1}을 정말로 삭제하시겠습니까?\n" +
+                                    "작성된 내용이 모두 사라집니다."
+                        )
                         .setPositiveButton("삭제") { dialog, _ ->
-                            val targetItem = items[currentPos]
-                            onSectionRemoved(targetItem)
-                            // 사용자가 '삭제'를 눌렀을 때만 실제 데이터 제거 및 화면 갱신을 진행합니다.
-                            items.removeAt(currentPos)
-                            notifyItemRemoved(currentPos)
-                            notifyItemRangeChanged(currentPos, items.size) // 삭제 후 하위 섹션 번호들 갱신
-                            dialog.dismiss() // 알림창 닫기
-                        }
-                        .setNegativeButton("취소") { dialog, _ ->
-                            // '취소'를 누르면 데이터 변경 없이 알림창만 닫습니다.
+
+                            // Dialog가 떠 있는 동안 position이 변경되었을 수도 있으므로
+                            // 다시 현재 position 확인
+                            val deletePos = holder.adapterPosition
+
+                            if (deletePos != RecyclerView.NO_POSITION) {
+                                val targetItem = items[deletePos]
+
+                                onSectionRemoved(targetItem)
+
+                                items.removeAt(deletePos)
+
+                                notifyItemRemoved(deletePos)
+                                notifyItemRangeChanged(
+                                    deletePos,
+                                    items.size - deletePos
+                                )
+                            }
+
                             dialog.dismiss()
                         }
-                        .show() // 2. 화면에 알림창 표시
+                        .setNegativeButton("취소") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
                 }
             }
         }

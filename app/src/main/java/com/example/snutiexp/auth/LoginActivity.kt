@@ -20,7 +20,7 @@ import retrofit2.Response
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
 
-    private var isAutoLoginChecked = false
+    private var isAutoLoginChecked = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,12 +43,6 @@ class LoginActivity : AppCompatActivity() {
     private fun initLoginUI() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // 체크박스 클릭 리스너 설정
-        binding.tvAutoLogin.setOnClickListener {
-            isAutoLoginChecked = !isAutoLoginChecked
-            updateCheckboxUI()
-        }
 
         // [비밀번호 찾기] 버튼 기능 추가
         binding.tvFindPassword.setOnClickListener {
@@ -141,16 +135,6 @@ class LoginActivity : AppCompatActivity() {
         if (savedId != null) {
             binding.etLoginId.setText(savedId)
             isAutoLoginChecked = true
-            updateCheckboxUI()
-        }
-    }
-
-    // 체크박스 아이콘 토글 헬퍼 함수
-    private fun updateCheckboxUI() {
-        if (isAutoLoginChecked) {
-            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(R.drawable.checkbox_on_background, 0, 0, 0)
-        } else {
-            binding.tvAutoLogin.setCompoundDrawablesWithIntrinsicBounds(R.drawable.checkbox_off_background, 0, 0, 0)
         }
     }
 

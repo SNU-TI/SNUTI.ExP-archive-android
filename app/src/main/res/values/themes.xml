@@ -3,6 +3,7 @@
     <style name="Base.Theme.SNUTIExP" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:statusBarColor">@android:color/white</item>
     </style>
     <style name="TitleText">
         <item name="android:textSize">28sp</item>
