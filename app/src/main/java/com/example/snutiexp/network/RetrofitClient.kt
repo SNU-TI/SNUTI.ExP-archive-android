@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://43.200.176.8:8080/"
+    private const val BASE_URL = "https://snuti-exp-archive-server-git-63548520741.asia-northeast3.run.app"
 
     private var okHttpClient: OkHttpClient? = null
     private var _service: LectureService? = null
