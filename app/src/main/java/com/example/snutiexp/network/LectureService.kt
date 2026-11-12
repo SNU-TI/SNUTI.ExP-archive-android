@@ -62,6 +62,7 @@ interface LectureService {
     // 강연 목록 조회 (GET /lectures)
     @GET("/lectures")
     fun getLectures(
+        @Query("tagId") tagId: Long? = null,
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
         @Query("sort") sort: String = "id,desc"
@@ -92,4 +93,44 @@ interface LectureService {
 
     @GET("/admin/tags")
     fun getTags(): Call<List<TagResponse>>
+
+
+    // 1. 전체 태그 목록 조회 (사용자 화면용)
+    @GET("/tags")
+    fun getTagsAll(): Call<List<TagResponse>>
+
+    // 2. 내 관심 태그 조회
+    @GET("/users/me/interests")
+    fun getInterests(): Call<List<TagResponse>>
+
+    // 3. 내 관심 태그 수정/저장
+    @PUT("/users/me/interests")
+    fun replaceInterests(
+        @Body request: UserInterestUpdateRequest
+    ): Call<List<TagResponse>>
+
+    // 4. 내 저장(즐겨찾기) 강좌 목록 조회
+    @GET("/users/me/favorites")
+    fun getFavorites(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Call<LectureListResponse>
+
+    // 5. 강좌 저장 추가
+    @POST("/users/me/favorites/{lectureId}")
+    fun addFavorite(
+        @Path("lectureId") lectureId: Long
+    ): Call<Void>
+
+    // 6. 강좌 저장 취소
+    @DELETE("/users/me/favorites/{lectureId}")
+    fun removeFavorite(
+        @Path("lectureId") lectureId: Long
+    ): Call<Void>
+
+    // 7. 특정 강좌 저장 여부 확인
+    @GET("/users/me/favorites/{lectureId}")
+    fun isFavorite(
+        @Path("lectureId") lectureId: Long
+    ): Call<Boolean>
 }

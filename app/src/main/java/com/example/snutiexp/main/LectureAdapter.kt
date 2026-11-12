@@ -10,7 +10,8 @@ import com.example.snutiexp.model.LectureListItemResponse
 
 class LectureAdapter(
     private var items: List<LectureListItemResponse>,
-    private val onItemClick: ((LectureListItemResponse, Int) -> Unit)? = null
+    private val onItemClick: ((LectureListItemResponse, Int) -> Unit)? = null,
+    private val onItemLongClick: ((LectureListItemResponse, Int) -> Unit)? = null
 ) : RecyclerView.Adapter<LectureAdapter.ViewHolder>() {
 
     // 각 아이템의 뷰를 보관하는 홀더입니다.
@@ -76,6 +77,15 @@ class LectureAdapter(
                         context.startActivity(intent)
                     }
                 }
+            }
+
+            // 6. 아이템 꾹 누르기(롱클릭) 리스너 추가 ⬅️
+            root.setOnLongClickListener { _ ->
+                val currentPosition = holder.adapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    onItemLongClick?.invoke(item, currentPosition)
+                }
+                true // true를 반환해야 롱클릭 후 일반 클릭 이벤트가 중복으로 튀지 않고 이벤트가 소비됩니다.
             }
         }
     }

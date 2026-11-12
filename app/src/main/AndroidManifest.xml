@@ -71,6 +71,11 @@
             android:name=".main.SettingsActivity"
             android:exported="false">
         </activity>
+
+        <activity
+            android:name=".main.UserInterestActivity"
+            android:exported="false">
+        </activity>>
     </application>
 
 </manifest>

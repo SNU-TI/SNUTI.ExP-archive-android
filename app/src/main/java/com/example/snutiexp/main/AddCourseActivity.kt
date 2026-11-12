@@ -75,34 +75,18 @@ class AddCourseActivity : AppCompatActivity() {
             .hide(editFragment) // 편집창은 일단 숨김
             .commit()
         //  Fragment가 생성된 뒤 기존 데이터 불러오기
+
+
         binding.root.post {
             if (isEditMode && editingLectureId != -1L) {
-                // 임시저장(Draft) 수정일 때는 서버에 상세 조회를 요청하지 않고,
-                // 이미 인텐트로 넘어온 데이터만 활용합니다. 일반 수정 모드일 때만 서버 조회를 실행합니다.
-                if (!isDraftEdit) {
-                    fetchLectureForEdit(editingLectureId)
-                    fetchAndRestoreArticles(editingLectureId)
-                } else {
-                    Log.d("REGISTER_DEBUG", "임시저장 수정 모드: 서버 상세 조회 및 본문 조회 생략 (인텐트 데이터 사용)")
-                }
-            }
-        }
 
-        // 편집 복원 분기 시점 제어
-        if (isDraftEdit) {
-            window.decorView.post {
-                infoFragment.restoreDraftData(
-                    title = intent.getStringExtra("EDIT_TITLE"),
-                    lecturer = intent.getStringExtra("EDIT_LECTURER"),
-                    date = intent.getStringExtra("EDIT_DATE"),
-                    topic = intent.getStringExtra("EDIT_TOPIC"),
-                    location = intent.getStringExtra("EDIT_LOCATION"),
-                    summary = intent.getStringExtra("EDIT_SUMMARY"),
-                    video = intent.getStringExtra("EDIT_VIDEO")
-                )
-            }
-            if (editingLectureId != -1L) {
+                // 일반 강의와 드래프트 모두
+                // LECTURE_ID를 이용하여 서버에서 기존 강의 정보를 가져옴
+                fetchLectureForEdit(editingLectureId)
+
+                // 텍스트/이미지 섹션 복원
                 fetchAndRestoreArticles(editingLectureId)
+                // 일반 강의 수정일 경우 본문 데이터도 복원
             }
         }
 
@@ -418,11 +402,7 @@ class AddCourseActivity : AppCompatActivity() {
     // 수정 모드 진입 시 본문 편집창(DocumentEditFragment)에 기존 섹션들을 리스토어하기 위해 상세 데이터를 땡겨오는 통신 파이프라인
     private fun fetchAndRestoreArticles(id: Long) {
         // 임시저장(Draft) 수정일 때는 서버에 본문 조회를 요청하지 않음 (400 에러 방지)
-        val isDraft = intent.getBooleanExtra("IS_EDIT", false)
-        if (isDraft) {
-            Log.d("REGISTER_DEBUG", "임시저장(Draft) 상태이므로 서버 본문 조회를 건너뜁니다.")
-            return
-        }
+
 
         RetrofitClient.service.getLectureDetail(id).enqueue(object : Callback<LectureDetailResponse> {
             override fun onResponse(call: Call<LectureDetailResponse>, response: Response<LectureDetailResponse>) {
@@ -465,7 +445,7 @@ class AddCourseActivity : AppCompatActivity() {
             btnSwitchEdit.isEnabled = !isLoading
         }
     }
-    
+
     private fun getCompressedImageFile(uri: Uri): File? {
         try {
             val inputStream = contentResolver.openInputStream(uri)

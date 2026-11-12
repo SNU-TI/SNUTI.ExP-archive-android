@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- 최상단 가장 작은 캡슐 바 -->
+    <path
+        android:fillColor="#80B3FF"
+        android:pathData="M9.5,4h5c1.1,0 2,0.45 2,1s-0.9,1 -2,1h-5c-1.1,0 -2,-0.45 -2,-1s0.9,-1 2,-1z" />
+
+    <!-- 중간 캡슐 바 -->
+    <path
+        android:fillColor="#66A3FF"
+        android:pathData="M7.5,7.5h9c1.1,0 2,0.45 2,1s-0.9,1 -2,1h-9c-1.1,0 -2,-0.45 -2,-1s0.9,-1 2,-1z" />
+
+    <!-- 하단 메인 폴더 바디 (모서리가 둥근 묵직한 사각형) -->
+    <path
+        android:fillColor="#4A89FF"
+        android:pathData="M5,11h14c1.38,0 2.5,1.12 2.5,2.5v6c0,1.38 -1.12,2.5 -2.5,2.5H5c-1.38,0 -2.5,-1.12 -2.5,-2.5v-6c0,-1.38 1.12,-2.5 2.5,-2.5z" />
+</vector>

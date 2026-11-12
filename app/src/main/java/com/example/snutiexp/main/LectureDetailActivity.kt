@@ -7,7 +7,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.snutiexp.R
 import com.example.snutiexp.databinding.ActivityLectureDetailBinding
 import com.example.snutiexp.model.LectureDetailResponse
 import com.example.snutiexp.network.RetrofitClient
@@ -23,6 +26,7 @@ class LectureDetailActivity : AppCompatActivity() {
     private lateinit var tagAdapter: TagHorizontalAdapter
 
     private var lectureId: Long = -1L
+    private var isFavorite: Boolean = false
 
     // 수정 화면에서 돌아왔을 때 강의 상세 정보 새로고침
     private val editLectureLauncher = registerForActivityResult(
@@ -30,6 +34,7 @@ class LectureDetailActivity : AppCompatActivity() {
     ) {
         if (lectureId != -1L) {
             fetchLectureDetail(lectureId)
+            checkFavoriteStatus(lectureId)
         }
     }
 
@@ -38,6 +43,14 @@ class LectureDetailActivity : AppCompatActivity() {
 
         binding = ActivityLectureDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 상단 상태바 및 카메라 영역과 버튼들이 겹치지 않도록 시스템 인셋 대응 적용
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            // 상단 상태바 높이만큼 루트 뷰에 패딩을 주어 하위 요소들이 아래로 밀려나도록 설정
+            binding.root.setPadding(0, systemBars.top, 0, systemBars.bottom)
+            insets
+        }
 
         // 1. 이전 화면에서 강의 ID 받기
         lectureId = intent.getLongExtra("LECTURE_ID", -1L)
@@ -58,13 +71,18 @@ class LectureDetailActivity : AppCompatActivity() {
             finish()
         }
 
-        // 3. 관리자 여부 확인
+        // 3. 즐겨찾기(별 모양) 버튼 클릭 리스너 추가
+        binding.btnFavorite.setOnClickListener {
+            toggleFavorite()
+        }
+
+        // 4. 관리자 여부 확인
         val isAdminUser = checkUserAdminStatus()
 
         binding.btnEditLecture.visibility =
             if (isAdminUser) View.VISIBLE else View.GONE
 
-        // 4. 수정 버튼
+        // 5. 수정 버튼
         binding.btnEditLecture.setOnClickListener {
             val editIntent = Intent(
                 this,
@@ -77,7 +95,7 @@ class LectureDetailActivity : AppCompatActivity() {
             editLectureLauncher.launch(editIntent)
         }
 
-        // 5. 상세 콘텐츠 RecyclerView
+        // 6. 상세 콘텐츠 RecyclerView
         detailAdapter = LectureDetailAdapter(emptyList())
 
         binding.rvDetailContents.apply {
@@ -105,7 +123,7 @@ class LectureDetailActivity : AppCompatActivity() {
             )
         }
 
-        // 6. 태그 RecyclerView
+        // 7. 태그 RecyclerView
         tagAdapter = TagHorizontalAdapter(
             items = emptyList(),
             isSelectedMode = true,
@@ -127,8 +145,74 @@ class LectureDetailActivity : AppCompatActivity() {
             isNestedScrollingEnabled = false
         }
 
-        // 7. 서버에서 강의 상세 조회
+        // 8. 서버에서 강의 상세 조회 및 즐겨찾기 여부 확인
         fetchLectureDetail(lectureId)
+        checkFavoriteStatus(lectureId)
+    }
+
+    /**
+     * 서버에서 현재 유저의 해당 강좌 즐겨찾기 여부 확인
+     */
+    private fun checkFavoriteStatus(id: Long) {
+        RetrofitClient.service.isFavorite(id).enqueue(object : Callback<Boolean> {
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if (response.isSuccessful) {
+                    isFavorite = response.body() ?: false
+                    updateFavoriteUI()
+                }
+            }
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                // 통신 실패 시 기본 비어있는 별 유지
+            }
+        })
+    }
+
+    /**
+     * 즐겨찾기 상태에 따라 별 아이콘 UI 갱신
+     */
+    private fun updateFavoriteUI() {
+        if (isFavorite) {
+            // 노란색 채워진 별
+            binding.btnFavorite.setImageResource(R.drawable.ic_star_filled)
+        } else {
+            // 검은색 테두리 빈 별
+            binding.btnFavorite.setImageResource(R.drawable.ic_star_border)
+        }
+    }
+
+    /**
+     * 별 모양 버튼 클릭 시 추가/해제 토글 처리
+     */
+    private fun toggleFavorite() {
+        if (isFavorite) {
+            // 즐겨찾기 해제 API 호출
+            RetrofitClient.service.removeFavorite(lectureId).enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        isFavorite = false
+                        updateFavoriteUI()
+                        Toast.makeText(this@LectureDetailActivity, "강좌 저장이 해제되었습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Toast.makeText(this@LectureDetailActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } else {
+            // 즐겨찾기 추가 API 호출
+            RetrofitClient.service.addFavorite(lectureId).enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        isFavorite = true
+                        updateFavoriteUI()
+                        Toast.makeText(this@LectureDetailActivity, "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Toast.makeText(this@LectureDetailActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     /**

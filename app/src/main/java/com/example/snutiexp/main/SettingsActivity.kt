@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.snutiexp.R
 import com.example.snutiexp.databinding.ActivitySettingsBinding
 import com.example.snutiexp.auth.LoginActivity
@@ -28,6 +31,21 @@ class SettingsActivity : AppCompatActivity() {
         // 1. 뷰 바인딩 초기화
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 상단 카메라/상태바 및 하단 네비게이션바 겹침 방지 인셋 처리
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // 상단 상태바 영역만큼 루트 뷰에 패딩을 주어 타이틀/뒤로가기 버튼이 잘리지 않게 보호
+            binding.root.setPadding(0, systemBars.top, 0, 0)
+
+            // 만약 하단에 고정된 버튼 그룹 등이 있다면 아래와 같이 systemBars.bottom을 반영해 줄 수 있습니다.
+            // val params = binding.someBottomView.layoutParams as ViewGroup.MarginLayoutParams
+            // params.bottomMargin = defaultMargin + systemBars.bottom
+            // binding.someBottomView.layoutParams = params
+
+            insets
+        }
 
         // 2. 뒤로가기 버튼 클릭 리스너
         binding.btnBack.setOnClickListener {
@@ -55,9 +73,12 @@ class SettingsActivity : AppCompatActivity() {
     private fun showChangePasswordDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null)
 
-        val etCurrentPw = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_current_pw)
-        val etNewPw = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_new_pw)
-        val etNewPwConfirm = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_new_pw_confirm)
+        val etCurrentPw =
+            dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_current_pw)
+        val etNewPw =
+            dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_new_pw)
+        val etNewPwConfirm =
+            dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_new_pw_confirm)
 
         AlertDialog.Builder(this)
             .setTitle("비밀번호 변경")
@@ -84,11 +105,16 @@ class SettingsActivity : AppCompatActivity() {
                 }
 
                 // 서버로 비밀번호 변경 요청 전송 (AuthInterceptor가 자동으로 토큰을 헤더에 붙여줌)
-                val request = ChangePasswordRequest(currentPassword = currentPw, newPassword = newPw)
+                val request =
+                    ChangePasswordRequest(currentPassword = currentPw, newPassword = newPw)
                 RetrofitClient.authService.changePassword(request).enqueue(object : Callback<Void> {
                     override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         if (response.isSuccessful) {
-                            Toast.makeText(this@SettingsActivity, "비밀번호가 성공적으로 변경되었습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@SettingsActivity,
+                                "비밀번호가 성공적으로 변경되었습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             val errorBody = response.errorBody()?.string() ?: ""
                             val message = when {
@@ -100,7 +126,8 @@ class SettingsActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Toast.makeText(this@SettingsActivity, "서버 연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SettingsActivity, "서버 연결에 실패했습니다.", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 })
             }
@@ -159,7 +186,8 @@ class SettingsActivity : AppCompatActivity() {
                     val sharedPref = getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                     sharedPref.edit().clear().apply()
 
-                    Toast.makeText(this@SettingsActivity, "계정이 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SettingsActivity, "계정이 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT)
+                        .show()
 
                     // 로그인 화면으로 이동 및 백스택 클리어
                     val intent = Intent(this@SettingsActivity, LoginActivity::class.java).apply {
@@ -168,7 +196,11 @@ class SettingsActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this@SettingsActivity, "계정 삭제에 실패했습니다. (코드: ${response.code()})", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        "계정 삭제에 실패했습니다. (코드: ${response.code()})",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 

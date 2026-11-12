@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.app.AlertDialog
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -16,6 +17,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.snutiexp.model.LectureListItemResponse
+import com.example.snutiexp.model.TagResponse
 
 class MainLectureListFragment : Fragment() {
     private var _binding: FragmentMainListBinding? = null
@@ -23,8 +25,11 @@ class MainLectureListFragment : Fragment() {
 
     private lateinit var lectureAdapter: LectureAdapter
 
-    private var allLectures =
-        mutableListOf<LectureListItemResponse>()
+    private var allLectures = mutableListOf<LectureListItemResponse>()
+
+    // 서버에서 가져온 전체 태그 목록 및 현재 선택된 태그 ID 저장 변수
+    private val allTags = mutableListOf<TagResponse>()
+    private var currentTagId: Long? = null
 
     // 현재 사용자가 입력한 검색어 상태를 기억할 변수 추가
     private var currentSearchKeyword: String = ""
@@ -49,6 +54,8 @@ class MainLectureListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
+        fetchServerTags()
+
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadLectures() // 다시 데이터 호출
         }
@@ -60,20 +67,94 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        lectureAdapter = LectureAdapter(emptyList()) { clickedItem, clickedPosition ->
-            if (clickedPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
-                val context = requireContext()
-                val intent = android.content.Intent(context, LectureDetailActivity::class.java).apply {
-                    putExtra("LECTURE_ID", clickedItem.id)
+        lectureAdapter = LectureAdapter(
+            items = emptyList(),
+            onItemClick = { clickedItem, clickedPosition ->
+                if (clickedPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+                    val context = requireContext()
+                    val intent = android.content.Intent(context, LectureDetailActivity::class.java).apply {
+                        putExtra("LECTURE_ID", clickedItem.id)
+                    }
+                    detailLauncher.launch(intent)
                 }
-                // startActivity 대신 런처로 호출하여 돌아왔을 때의 흐름 제어
-                detailLauncher.launch(intent)
+            },
+            onItemLongClick = { clickedItem, _ ->
+                // 1. 길게 누른 강좌가 이미 저장된 상태인지 서버에 먼저 확인
+                RetrofitClient.service.isFavorite(clickedItem.id).enqueue(object : Callback<Boolean> {
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (response.isSuccessful) {
+                            val isAlreadySaved = response.body() ?: false
+
+                            if (isAlreadySaved) {
+                                // 2-A. 이미 저장된 강좌라면 팝업 없이 곧바로 토스트 메시지만 출력
+                                Toast.makeText(requireContext(), "이미 저장된 강좌입니다.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                // 2-B. 아직 저장되지 않은 강좌라면 저장 확인 팝업(다이얼로그) 띄우기
+                                AlertDialog.Builder(requireContext())
+                                    .setTitle("강좌 저장")
+                                    .setMessage("강좌를 저장하시겠습니까?")
+                                    .setPositiveButton("저장") { _, _ ->
+                                        // 사용자가 '저장'을 누르면 실제 즐겨찾기 추가 API 호출
+                                        RetrofitClient.service.addFavorite(clickedItem.id).enqueue(object : Callback<Void> {
+                                            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                                if (response.isSuccessful) {
+                                                    Toast.makeText(requireContext(), "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(requireContext(), "저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                            override fun onFailure(call: Call<Void>, t: Throwable) {
+                                                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        })
+                                    }
+                                    .setNegativeButton("취소", null)
+                                    .show()
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), "저장 여부를 확인하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
-        }
+        )
         binding.rvLectures.apply {
             adapter = lectureAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
+    }
+
+    private fun fetchServerTags() {
+        RetrofitClient.service.getTags().enqueue(object : Callback<List<TagResponse>> {
+            override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    allTags.clear()
+                    allTags.addAll(response.body()!!)
+                }
+            }
+            override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
+                Log.e("API_ERROR", "태그 목록 로드 실패: ${t.message}")
+            }
+        })
+    }
+
+    fun filterByTags(tagNames: List<String>) {
+        currentTagId = if (tagNames.isEmpty()) {
+            null
+        } else {
+            // 선택된 태그 이름과 일치하는 서버 태그의 ID를 매핑
+            allTags.find { it.name == tagNames.first() }?.id
+        }
+        loadLectures()
+    }
+
+    fun filterByTag(tagId: Long?) {
+        currentTagId = tagId
+        loadLectures()
     }
 
     private fun loadLectures() {
@@ -81,18 +162,16 @@ class MainLectureListFragment : Fragment() {
             binding.swipeRefreshLayout.isRefreshing = true
         }
 
-        RetrofitClient.service.getLectures(page = 0, size = 20, sort = "id,desc")
+        RetrofitClient.service.getLectures(tagId = currentTagId, page = 0, size = 20, sort = "id,desc")
             .enqueue(object : Callback<LectureListResponse> {
                 override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
                     binding.swipeRefreshLayout.isRefreshing = false
                     if (response.isSuccessful) {
                         val body = response.body()
-
                         val newItems = body?.content ?: emptyList()
                         allLectures.clear()
                         allLectures.addAll(newItems)
 
-                        // 💡 4. 데이터를 불러온 뒤, 만약 검색 중이었다면 기존 검색어를 유지하여 필터링 적용!
                         if (currentSearchKeyword.isNotBlank()) {
                             searchLecture(currentSearchKeyword)
                         } else {

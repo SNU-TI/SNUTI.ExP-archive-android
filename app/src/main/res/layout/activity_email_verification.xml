@@ -9,11 +9,12 @@
 
     <ImageButton
         android:id="@+id/btn_back"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="40dp"
         android:background="@drawable/bg_white_circle"
+        android:elevation="4dp"
         android:padding="8dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back"
