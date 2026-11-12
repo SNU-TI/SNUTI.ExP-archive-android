@@ -266,11 +266,12 @@ class MainActivity : AppCompatActivity() {
         if (isCurrentScreenDraft) {
             // 드래프트 화면: 전체/맞춤/저장 탭 바 숨김, 돋보기 버튼은 유지
             binding.layoutSearchGroup.visibility = View.GONE
+            binding.btnSearchToggle.visibility = View.GONE
         } else {
             // 일반 메인 화면: 탭 바 및 돋보기 버튼 모두 표시
             binding.layoutSearchGroup.visibility = View.VISIBLE
+            binding.btnSearchToggle.visibility = View.VISIBLE
         }
-        binding.btnSearchToggle.visibility = View.VISIBLE
     }
 
     // 하단 탭(전체, 맞춤, 저장) 선택 상태 관리 함수
