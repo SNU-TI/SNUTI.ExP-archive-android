@@ -2,6 +2,7 @@ package com.example.snutiexp.network
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.example.snutiexp.auth.LoginActivity
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -11,9 +12,9 @@ class AuthInterceptor(private val context: Context) : Interceptor {
         val originalRequest = chain.request()
         val urlPath = originalRequest.url.encodedPath
 
-        // 로그인, 회원가입 등 인증 관련 엔드포인트는 401이 떠도 강제 로그아웃시키면 안 됩니다.
+        // 로그인, 회원가입 등 인증 관련 엔드포인트는 403이 떠도 강제 로그아웃시키면 안 됩니다.
         // (비밀번호 틀림 등은 정상적인 실패 응답이기 때문)
-        if (urlPath.contains("/login") || urlPath.contains("/signup") || urlPath.contains("/auth")) {
+        if (urlPath.contains("/auth/login") || urlPath.contains("/auth/signup") || urlPath.contains("/auth/register")) {
             return chain.proceed(originalRequest)
         }
 
@@ -31,8 +32,9 @@ class AuthInterceptor(private val context: Context) : Interceptor {
         val response = chain.proceed(request)
 
         // 3. 서버 응답 코드가 401(Unauthorized)이면 토큰이 만료된 것으로 간주합니다.
-        if (response.code == 401 || response.code == 403) {
-            // 동시 다발적인 401 호출 시 중복 처리를 막기 위한 방어 코드 (선택 사항이지만 안전)
+        //    403(Forbidden - 권한 없음)은 서버 권한 정책이나 데이터 상태에 따라 다를 수 있으므로
+        //    무조건적인 토큰 삭제 및 강제 로그아웃 대상에서 제외하는 것이 안전합니다.
+        if (response.code == 401) {
             synchronized(this) {
                 val currentToken = sharedPref.getString("access_token", null)
                 if (currentToken != null) {

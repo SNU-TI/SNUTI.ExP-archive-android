@@ -34,10 +34,14 @@ class MainLectureListFragment : Fragment() {
     // 현재 사용자가 입력한 검색어 상태를 기억할 변수 추가
     private var currentSearchKeyword: String = ""
 
+    // 진행 중인 네트워크 요청을 추적할 Call 객체 변수 선언
+    private var lectureCall: Call<LectureListResponse>? = null
+    private var tagCall: Call<List<TagResponse>>? = null
+
     // 상세 화면에서 돌아올 때 결과를 처리할 런처 등록
     private val detailLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
+    ) { _ ->
         // 상세 화면(LectureDetailActivity)이나 수정 화면에서 돌아왔을 때 데이터 갱신
         loadLectures()
     }
@@ -82,6 +86,8 @@ class MainLectureListFragment : Fragment() {
                 // 1. 길게 누른 강좌가 이미 저장된 상태인지 서버에 먼저 확인
                 RetrofitClient.service.isFavorite(clickedItem.id).enqueue(object : Callback<Boolean> {
                     override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (!isAdded || _binding == null) return
+
                         if (response.isSuccessful) {
                             val isAlreadySaved = response.body() ?: false
 
@@ -97,6 +103,8 @@ class MainLectureListFragment : Fragment() {
                                         // 사용자가 '저장'을 누르면 실제 즐겨찾기 추가 API 호출
                                         RetrofitClient.service.addFavorite(clickedItem.id).enqueue(object : Callback<Void> {
                                             override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                                if (!isAdded || _binding == null) return
+
                                                 if (response.isSuccessful) {
                                                     Toast.makeText(requireContext(), "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
                                                 } else {
@@ -104,6 +112,7 @@ class MainLectureListFragment : Fragment() {
                                                 }
                                             }
                                             override fun onFailure(call: Call<Void>, t: Throwable) {
+                                                if (!isAdded || _binding == null) return
                                                 Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                                             }
                                         })
@@ -117,6 +126,7 @@ class MainLectureListFragment : Fragment() {
                     }
 
                     override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        if (!isAdded || _binding == null) return
                         Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                     }
                 })
@@ -129,14 +139,20 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun fetchServerTags() {
-        RetrofitClient.service.getTags().enqueue(object : Callback<List<TagResponse>> {
+        tagCall?.cancel()
+        tagCall = RetrofitClient.service.getTagsAll()
+        tagCall?.enqueue(object : Callback<List<TagResponse>> {
             override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
+                if (!isAdded || _binding == null) return
+
                 if (response.isSuccessful && response.body() != null) {
                     allTags.clear()
                     allTags.addAll(response.body()!!)
                 }
             }
             override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                if (!isAdded || _binding == null) return
                 Log.e("API_ERROR", "태그 목록 로드 실패: ${t.message}")
             }
         })
@@ -158,13 +174,19 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun loadLectures() {
+        // 새로 요청을 보내기 전, 이전에 진행 중이던 강좌 요청이 있다면 즉시 취소
+        lectureCall?.cancel()
+
         if (!binding.swipeRefreshLayout.isRefreshing) {
             binding.swipeRefreshLayout.isRefreshing = true
         }
 
-        RetrofitClient.service.getLectures(tagId = currentTagId, page = 0, size = 20, sort = "id,desc")
-            .enqueue(object : Callback<LectureListResponse> {
+        lectureCall = RetrofitClient.service.getLectures(tagId = currentTagId, page = 0, size = 20, sort = "id,desc")
+        lectureCall?.enqueue(object : Callback<LectureListResponse> {
                 override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
+                    // 응답 시점에 프래그먼트가 살아있는지 검사
+                    if (!isAdded || _binding == null) return
+
                     binding.swipeRefreshLayout.isRefreshing = false
                     if (response.isSuccessful) {
                         val body = response.body()
@@ -192,6 +214,9 @@ class MainLectureListFragment : Fragment() {
                 }
 
                 override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
+                    if (call.isCanceled) return
+                    if (!isAdded || _binding == null) return
+
                     binding.swipeRefreshLayout.isRefreshing = false
                     Log.e("API_ERROR", "네트워크 오류: ${t.message}")
                     Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
@@ -199,6 +224,8 @@ class MainLectureListFragment : Fragment() {
             })
     }
     fun searchLecture(keyword: String) {
+        if (_binding == null) return
+
         // 검색할 때마다 키워드를 전역 변수에 저장
         currentSearchKeyword = keyword
         val trimmedKeyword = keyword.trim()
@@ -215,8 +242,10 @@ class MainLectureListFragment : Fragment() {
                 }
             }
 
+        if (_binding == null) return
         lectureAdapter.updateList(filteredList)
 
+        if (_binding == null) return
         if (filteredList.isEmpty()) {
             binding.layoutEmpty.visibility = View.VISIBLE
             binding.rvLectures.visibility = View.GONE
@@ -227,6 +256,9 @@ class MainLectureListFragment : Fragment() {
     }
     override fun onDestroyView() {
         super.onDestroyView()
+        // 화면이 파괴될 때 진행 중인 네트워크 요청을 안전하게 모두 취소
+        lectureCall?.cancel()
+        tagCall?.cancel()
         _binding = null
     }
 }

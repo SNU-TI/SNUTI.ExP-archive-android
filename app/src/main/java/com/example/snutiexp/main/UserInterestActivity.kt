@@ -1,8 +1,8 @@
 package com.example.snutiexp.main
 
+import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -32,10 +32,16 @@ class UserInterestActivity : AppCompatActivity() {
     private lateinit var selectedTagAdapter: UserInterestAdapter
     private lateinit var availableTagAdapter: UserInterestAdapter
 
+    // 회원가입 직후 진입했는지 여부를 판별하는 플래그 변수
+    private var isFromSignup = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserInterestBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // SignupActivity에서 넘겨준 플래그 값 받기
+        isFromSignup = intent.getBooleanExtra("IS_FROM_SIGNUP", false)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -94,7 +100,17 @@ class UserInterestActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.btnBack.setOnClickListener { finish() }
+        // 뒤로가기 버튼 동작을 진입 경로에 따라 다르게 분기
+        binding.btnBack.setOnClickListener {
+            handleBackAction()
+        }
+
+        // 안드로이드 시스템 백 버튼(뒤로가기 제스처/키) 처리
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackAction()
+            }
+        })
 
         binding.etTagSearch.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -109,6 +125,23 @@ class UserInterestActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveUserInterests()
         }
+    }
+
+    // 뒤로가기 동작 공통 처리 (회원가입 직후면 메인으로, 일반 진입이면 finish)
+    private fun handleBackAction() {
+        if (isFromSignup) {
+            navigateToMain()
+        } else {
+            finish()
+        }
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun fetchInitialData() {
@@ -158,7 +191,18 @@ class UserInterestActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@UserInterestActivity, "관심 태그가 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                    finish()
+                    // 진입 경로에 따른 분기 처리
+                    if (isFromSignup) {
+                        // 회원가입 직후 진입한 경우: 메인 화면으로 이동 및 스택 클리어
+                        val intent = Intent(this@UserInterestActivity, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // '맞춤' 탭 등 일반 진입인 경우: 단순히 이전 화면("맞춤" 탭 화면)으로 복귀
+                        finish()
+                    }
                 } else {
                     Toast.makeText(this@UserInterestActivity, "저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }

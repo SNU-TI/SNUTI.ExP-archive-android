@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     // 현재 띄워진 화면 상태를 추적하는 동적 플래그 변수 (false:초기값/true:드래프트 강좌)
     private var isCurrentScreenDraft: Boolean = false
 
+    // 현재 선택된 탭 번호 추적 변수 (1: 전체, 2: 맞춤, 3: 저장)
+    private var currentTab: Int = 1
+
     // 서버에서 가져온 전체 태그 목록
     private val allTags = mutableListOf<TagResponse>()
     // 사용자가 현재 선택한 태그 이름 목록 (다중 선택 지원)
@@ -155,7 +158,18 @@ class MainActivity : AppCompatActivity() {
                 // 3. 실제 검색바들을 키보드 높이만큼 위로 올려서 키보드 바로 위에 위치시킴
                 val raiseHeight = ime.bottom
                 binding.layoutSearchBarContainer.translationY = -raiseHeight.toFloat()
-                binding.layoutTagSearchContainer.translationY = -raiseHeight.toFloat()
+
+                // 맞춤 탭(currentTab == 2)일 때는 태그 검색 영역을 숨김 처리하고, 다른 탭일 때만 보여줌
+                if (currentTab == 2) {
+                    binding.layoutTagSearchContainer.visibility = View.GONE
+                } else {
+                    binding.layoutTagSearchContainer.visibility = View.VISIBLE
+                    binding.layoutTagSearchContainer.translationY = -raiseHeight.toFloat()
+
+                    if (allTags.isEmpty()) {
+                        fetchServerTags()
+                    }
+                }
             } else {
                 // [키보드가 닫혔을 때]
                 // 1. 태그 검색 영역을 다시 숨김
@@ -222,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 
     // 서버로부터 전체 태그 목록을 불러오는 함수
     private fun fetchServerTags() {
-        RetrofitClient.service.getTags().enqueue(object : Callback<List<TagResponse>> {
+        RetrofitClient.service.getTagsAll().enqueue(object : Callback<List<TagResponse>> {
             override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
                 if (response.isSuccessful && response.body() != null) {
                     allTags.clear()
@@ -245,8 +259,13 @@ class MainActivity : AppCompatActivity() {
 
         // 현재 프래그먼트에 선택된 태그 이름(또는 ID) 리스트 전달하여 강좌 목록 필터링 실행
         val currentFragment = supportFragmentManager.findFragmentById(R.id.main_container)
-        if (currentFragment is MainLectureListFragment) {
-            currentFragment.filterByTags(selectedTagNames.toList())
+        when (currentFragment) {
+            is MainLectureListFragment -> {
+                currentFragment.filterByTags(selectedTagNames.toList())
+            }
+            is SavedLectureListFragment -> {
+                currentFragment.filterByTags(selectedTagNames.toList())
+            }
         }
     }
 
@@ -277,6 +296,7 @@ class MainActivity : AppCompatActivity() {
     // 하단 탭(전체, 맞춤, 저장) 선택 상태 관리 함수
     private fun setupBottomTabs() {
         binding.btnTabAll.setOnClickListener {
+            currentTab = 1
             updateTabSelection(selectedTab = 1)
             // 전체 강좌 목록 프래그먼트로 전환
             supportFragmentManager.beginTransaction()
@@ -285,6 +305,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnTabCustom.setOnClickListener {
+            currentTab = 2
             updateTabSelection(selectedTab = 2)
             // 맞춤 강좌 목록 프래그먼트로 전환
             supportFragmentManager.beginTransaction()
@@ -293,6 +314,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnTabSaved.setOnClickListener {
+            currentTab = 3
             updateTabSelection(selectedTab = 3)
             // 저장된 강좌 목록 프래그먼트로 전환하도록 추가
             supportFragmentManager.beginTransaction()

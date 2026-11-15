@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.snutiexp.databinding.ActivitySignupBinding
+import com.example.snutiexp.main.UserInterestActivity
 import com.example.snutiexp.model.AuthResponse
 import com.example.snutiexp.model.SignupRequest
 import com.example.snutiexp.network.RetrofitClient
@@ -90,7 +91,8 @@ class SignupActivity : AppCompatActivity() {
                             Toast.makeText(this@SignupActivity, "회원가입이 완료되었습니다!", Toast.LENGTH_SHORT).show()
 
                             // 최종 회원가입 종료 후 로그인 화면으로 이동 및 백스택 클리어
-                            val intent = Intent(this@SignupActivity, LoginActivity::class.java).apply {
+                            val intent = Intent(this@SignupActivity, UserInterestActivity::class.java).apply {
+                                putExtra("IS_FROM_SIGNUP", true)
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             }
                             startActivity(intent)

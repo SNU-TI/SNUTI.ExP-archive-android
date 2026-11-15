@@ -29,12 +29,21 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
     private var currentQuery: String = "" // 현재 검색어 기억용
     private var selectedTagId: Long? = null // 현재 선택된 필터 태그 ID (단일 선택)
 
+    // 진행 중인 네트워크 요청을 추적할 Call 객체 변수 선언
+    private var interestsCall: Call<List<TagResponse>>? = null
+    private var lecturesCall: Call<LectureListResponse>? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentCustomLectureListBinding.bind(view)
 
         setupRecyclerViews()
         setupListeners()
+
+        // 새로고침 리스너 추가
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            fetchCustomData()
+        }
     }
 
     override fun onResume() {
@@ -67,7 +76,6 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
             adapter = tagPreviewAdapter
         }
 
-        // 2. 맞춤 강좌 목록 어댑터
         // 2. 맞춤 강좌 목록 어댑터 (클릭 및 롱클릭 리스너 추가)
         lectureAdapter = LectureAdapter(
             items = emptyList(),
@@ -84,6 +92,8 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                 // 1. 길게 누른 강좌가 이미 저장된 상태인지 서버에 먼저 확인
                 RetrofitClient.service.isFavorite(clickedItem.id).enqueue(object : Callback<Boolean> {
                     override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (!isAdded || _binding == null) return
+
                         if (response.isSuccessful) {
                             val isAlreadySaved = response.body() ?: false
 
@@ -99,6 +109,8 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                                         // 사용자가 '저장'을 누르면 실제 즐겨찾기 추가 API 호출
                                         RetrofitClient.service.addFavorite(clickedItem.id).enqueue(object : Callback<Void> {
                                             override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                                if (!isAdded || _binding == null) return
+
                                                 if (response.isSuccessful) {
                                                     Toast.makeText(requireContext(), "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
                                                 } else {
@@ -106,6 +118,8 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                                                 }
                                             }
                                             override fun onFailure(call: Call<Void>, t: Throwable) {
+                                                if (!isAdded || _binding == null) return
+
                                                 Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                                             }
                                         })
@@ -119,6 +133,8 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                     }
 
                     override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        if (!isAdded || _binding == null) return
+
                         Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                     }
                 })
@@ -143,9 +159,19 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
     }
 
     private fun fetchCustomData() {
-        // 1. 내 관심 태그 불러오기
-        RetrofitClient.service.getInterests().enqueue(object : Callback<List<TagResponse>> {
+        // 로딩 시작 시 SwipeRefreshLayout 스피너 표시
+        if (_binding != null && !binding.swipeRefreshLayout.isRefreshing) {
+            binding.swipeRefreshLayout.isRefreshing = true
+        }
+
+        // 새로운 요청 전 이전 관심 태그 조회 요청 취소
+        interestsCall?.cancel()
+        interestsCall = RetrofitClient.service.getInterests()
+        interestsCall?.enqueue(object : Callback<List<TagResponse>> {
             override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
+                // 응답 시점에 뷰가 살아있는지 검사
+                if (!isAdded || _binding == null) return
+
                 if (response.isSuccessful) {
                     val myTags = response.body() ?: emptyList()
                     // 만약 기존에 선택했던 태그가 삭제되었거나 했다면 선택 해제
@@ -159,16 +185,27 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                     fetchCustomLectures(myTags)
                 }
             }
-            override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {}
+            override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                if (!isAdded || _binding == null) return
+            }
         })
     }
 
     private fun fetchCustomLectures(myTags: List<TagResponse>) {
         val tagIds = myTags.map { it.id }.toSet()
 
+        // 새로운 요청 전 이전 강좌 조회 요청 취소
+        lecturesCall?.cancel()
+        lecturesCall = RetrofitClient.service.getLectures()
         // 전체 강좌를 조회한 뒤, 사용자의 관심 태그 ID가 하나라도 포함된 강좌만 필터링
-        RetrofitClient.service.getLectures().enqueue(object : Callback<LectureListResponse> {
+        lecturesCall?.enqueue(object : Callback<LectureListResponse> {
             override fun onResponse(call: Call<LectureListResponse>, response: Response<LectureListResponse>) {
+                if (!isAdded || _binding == null) return
+
+                // 데이터 로드 완료 시 로딩 스피너 해제 (Main과 동일)
+                binding.swipeRefreshLayout.isRefreshing = false
+
                 if (response.isSuccessful) {
                     val allLectures = response.body()?.content ?: emptyList()
 
@@ -184,12 +221,20 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                     applyFilters()
                 }
             }
-            override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
+                if (call.isCanceled) return
+                if (!isAdded || _binding == null) return
+
+                // 네트워크 실패 시 로딩 스피너 해제
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
         })
     }
 
     // 검색어와 개별 태그 선택 필터를 동시에 고려하여 강좌 목록을 갱신하는 공통 함수
     private fun applyFilters() {
+        if (_binding == null) return
+
         var filtered = allCustomLectures
 
         // 1. 개별 태그 필터 적용 (선택된 태그가 있다면 해당 태그를 포함한 강좌만)
@@ -205,9 +250,11 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
             filtered = filtered.filter { it.title.contains(trimmed, ignoreCase = true) }
         }
 
+        if (_binding == null) return
         lectureAdapter.updateList(filtered)
 
         // 빈 화면 제어
+        if (_binding == null) return
         if (filtered.isEmpty()) {
             binding.layoutEmpty.visibility = View.VISIBLE
             binding.rvCustomLectures.visibility = View.GONE
@@ -225,6 +272,9 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // 화면이 파괴될 때 진행 중인 네트워크 요청을 안전하게 모두 취소
+        interestsCall?.cancel()
+        lecturesCall?.cancel()
         _binding = null
     }
 }
