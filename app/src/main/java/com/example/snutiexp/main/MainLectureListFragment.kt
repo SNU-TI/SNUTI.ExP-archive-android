@@ -18,6 +18,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import com.example.snutiexp.model.LectureListItemResponse
 import com.example.snutiexp.model.TagResponse
+import android.content.Context
 
 class MainLectureListFragment : Fragment() {
     private var _binding: FragmentMainListBinding? = null
@@ -71,6 +72,11 @@ class MainLectureListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val sharedPref = requireContext()
+            .getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+
+        val isAdminUser = sharedPref.getBoolean("is_admin_user", false)
+
         lectureAdapter = LectureAdapter(
             items = emptyList(),
             onItemClick = { clickedItem, clickedPosition ->
@@ -84,52 +90,101 @@ class MainLectureListFragment : Fragment() {
             },
             onItemLongClick = { clickedItem, _ ->
                 // 1. 길게 누른 강좌가 이미 저장된 상태인지 서버에 먼저 확인
-                RetrofitClient.service.isFavorite(clickedItem.id).enqueue(object : Callback<Boolean> {
-                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                        if (!isAdded || _binding == null) return
-
-                        if (response.isSuccessful) {
-                            val isAlreadySaved = response.body() ?: false
-
-                            if (isAlreadySaved) {
-                                // 2-A. 이미 저장된 강좌라면 팝업 없이 곧바로 토스트 메시지만 출력
-                                Toast.makeText(requireContext(), "이미 저장된 강좌입니다.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                // 2-B. 아직 저장되지 않은 강좌라면 저장 확인 팝업(다이얼로그) 띄우기
-                                AlertDialog.Builder(requireContext())
-                                    .setTitle("강좌 저장")
-                                    .setMessage("강좌를 저장하시겠습니까?")
-                                    .setPositiveButton("저장") { _, _ ->
-                                        // 사용자가 '저장'을 누르면 실제 즐겨찾기 추가 API 호출
-                                        RetrofitClient.service.addFavorite(clickedItem.id).enqueue(object : Callback<Void> {
-                                            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                                                if (!isAdded || _binding == null) return
-
-                                                if (response.isSuccessful) {
-                                                    Toast.makeText(requireContext(), "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                                                } else {
-                                                    Toast.makeText(requireContext(), "저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }
-                                            override fun onFailure(call: Call<Void>, t: Throwable) {
-                                                if (!isAdded || _binding == null) return
-                                                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                                            }
-                                        })
-                                    }
-                                    .setNegativeButton("취소", null)
-                                    .show()
-                            }
-                        } else {
-                            Toast.makeText(requireContext(), "저장 여부를 확인하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                if (isAdminUser) {
+                    // 관리자: 강좌 삭제 확인 다이얼로그
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("강좌 삭제")
+                        .setMessage("'${clickedItem.title}' 강좌를 삭제하시겠습니까?")
+                        .setPositiveButton("삭제") { _, _ ->
+                            deleteLecture(clickedItem.id)
                         }
-                    }
+                        .setNegativeButton("취소", null)
+                        .show()
 
-                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                        if (!isAdded || _binding == null) return
-                        Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                })
+                } else {
+                    RetrofitClient.service.isFavorite(clickedItem.id)
+                        .enqueue(object : Callback<Boolean> {
+                            override fun onResponse(
+                                call: Call<Boolean>,
+                                response: Response<Boolean>
+                            ) {
+                                if (!isAdded || _binding == null) return
+
+                                if (response.isSuccessful) {
+                                    val isAlreadySaved = response.body() ?: false
+
+                                    if (isAlreadySaved) {
+                                        // 2-A. 이미 저장된 강좌라면 팝업 없이 곧바로 토스트 메시지만 출력
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "이미 저장된 강좌입니다.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        // 2-B. 아직 저장되지 않은 강좌라면 저장 확인 팝업(다이얼로그) 띄우기
+                                        AlertDialog.Builder(requireContext())
+                                            .setTitle("강좌 저장")
+                                            .setMessage("강좌를 저장하시겠습니까?")
+                                            .setPositiveButton("저장") { _, _ ->
+                                                // 사용자가 '저장'을 누르면 실제 즐겨찾기 추가 API 호출
+                                                RetrofitClient.service.addFavorite(clickedItem.id)
+                                                    .enqueue(object : Callback<Void> {
+                                                        override fun onResponse(
+                                                            call: Call<Void>,
+                                                            response: Response<Void>
+                                                        ) {
+                                                            if (!isAdded || _binding == null) return
+
+                                                            if (response.isSuccessful) {
+                                                                Toast.makeText(
+                                                                    requireContext(),
+                                                                    "강좌가 저장되었습니다.",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            } else {
+                                                                Toast.makeText(
+                                                                    requireContext(),
+                                                                    "저장에 실패했습니다.",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            }
+                                                        }
+
+                                                        override fun onFailure(
+                                                            call: Call<Void>,
+                                                            t: Throwable
+                                                        ) {
+                                                            if (!isAdded || _binding == null) return
+                                                            Toast.makeText(
+                                                                requireContext(),
+                                                                "네트워크 오류가 발생했습니다.",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                    })
+                                            }
+                                            .setNegativeButton("취소", null)
+                                            .show()
+                                    }
+                                } else {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "저장 여부를 확인하지 못했습니다.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+
+                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                if (!isAdded || _binding == null) return
+                                Toast.makeText(
+                                    requireContext(),
+                                    "네트워크 오류가 발생했습니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
+                }
             }
         )
         binding.rvLectures.apply {
@@ -253,6 +308,56 @@ class MainLectureListFragment : Fragment() {
             binding.layoutEmpty.visibility = View.GONE
             binding.rvLectures.visibility = View.VISIBLE
         }
+    }
+    private fun deleteLecture(lectureId: Long) {
+        RetrofitClient.service.deleteLecture(lectureId)
+            .enqueue(object : Callback<Void> {
+
+                override fun onResponse(
+                    call: Call<Void>,
+                    response: Response<Void>
+                ) {
+                    if (!isAdded || _binding == null) return
+
+                    if (response.isSuccessful) {
+                        Toast.makeText(
+                            requireContext(),
+                            "강좌가 삭제되었습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // 강좌 목록 새로고침
+                        loadLectures()
+
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "강좌 삭제에 실패했습니다. (${response.code()})",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        Log.e(
+                            "DELETE_LECTURE",
+                            "삭제 실패: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<Void>,
+                    t: Throwable
+                ) {
+                    if (!isAdded || _binding == null) return
+
+                    Toast.makeText(
+                        requireContext(),
+                        "네트워크 오류가 발생했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    Log.e("DELETE_LECTURE", "삭제 요청 실패", t)
+                }
+            })
     }
     override fun onDestroyView() {
         super.onDestroyView()

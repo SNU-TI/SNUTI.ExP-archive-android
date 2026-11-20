@@ -173,7 +173,6 @@
             android:layout_weight="1"
             android:layout_marginStart="12dp"
             android:background="@null"
-            android:hint="Placeholder"
             android:textColor="#000000"
             android:textColorHint="#999999"
             android:textSize="15sp"

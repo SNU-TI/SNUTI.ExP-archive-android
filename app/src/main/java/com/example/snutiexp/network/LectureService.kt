@@ -10,6 +10,12 @@ interface LectureService {
     @POST("/admin/lectures")
     fun createLecture(@Body request: LectureCreateRequest): Call<LectureCreateResponse>
 
+    // 강연 삭제 (DELETE /admin/lectures/{lectureId})
+    @DELETE("/admin/lectures/{lectureId}")
+    fun deleteLecture(
+        @Path("lectureId") lectureId: Long
+    ): Call<Void>
+
     // 강연에 비디오 추가 (POST /admin/lectures/{lectureId}/videos)
     @POST("/admin/lectures/{lectureId}/videos")
     fun addVideo(
@@ -93,6 +99,12 @@ interface LectureService {
 
     @GET("/admin/tags")
     fun getTags(): Call<List<TagResponse>>
+
+    // 관리자 전용 태그 삭제
+    @DELETE("/admin/tags/{tagId}")
+    fun deleteTag(
+        @Path("tagId") tagId: Long
+    ): Call<Void>
 
 
     // 1. 전체 태그 목록 조회 (사용자 화면용)

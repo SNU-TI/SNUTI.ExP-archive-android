@@ -1,11 +1,14 @@
 package com.example.snutiexp.main
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -86,6 +89,14 @@ class InfoInputFragment : Fragment() {
             refreshRecommendedTagsUI()
         }
     }
+    private fun checkUserAdminStatus(): Boolean {
+        val sharedPref = requireContext().getSharedPreferences(
+            "token_prefs",
+            Context.MODE_PRIVATE
+        )
+        return sharedPref.getBoolean("is_admin_user", false)
+    }
+
     // 선택된 태그 RecyclerView 초기화
     private fun setupRecyclerViews() {
         selectedAdapter = TagHorizontalAdapter(
@@ -106,15 +117,29 @@ class InfoInputFragment : Fragment() {
         recommendedAdapter = TagHorizontalAdapter(
             items = emptyList(),
             isSelectedMode = false,
-            selectedChecker = { tagName -> selectedTagNames.contains(tagName) },
+
+            selectedChecker = { tagName ->
+                selectedTagNames.contains(tagName)
+            },
+
             onItemClick = { tagName ->
                 if (selectedTagNames.contains(tagName)) {
                     selectedTagNames.remove(tagName)
                 } else {
                     selectedTagNames.add(tagName)
                 }
+
                 refreshSelectedTagsUI()
                 refreshRecommendedTagsUI()
+            },
+
+            // 관리자 계정일 때만 롱클릭 기능 연결
+            onItemLongClick = if (checkUserAdminStatus()) {
+                { tagName ->
+                    showDeleteTagDialog(tagName)
+                }
+            } else {
+                null
             }
         )
         binding.recyclerRecommendedTags.apply {
@@ -263,6 +288,78 @@ class InfoInputFragment : Fragment() {
             status = targetStatus,                                    // 초기 상태
             tags = selectedTagNames.toList()
         )
+    }
+
+
+    private fun showDeleteTagDialog(tagName: String) {
+
+        if (!checkUserAdminStatus()) return
+
+        val tag = allRecommendedTags.find { it.name == tagName }
+
+        if (tag != null) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("태그 삭제")
+                .setMessage("'${tag.name}' 태그를 정말 삭제하시겠습니까?")
+                .setPositiveButton("삭제") { _, _ ->
+                    deleteTag(tag.id, tag.name)
+                }
+                .setNegativeButton("취소", null)
+                .show()
+        }
+    }
+
+
+    private fun deleteTag(tagId: Long, tagName: String) {
+
+        if (!checkUserAdminStatus()) return
+
+        RetrofitClient.service.deleteTag(tagId)
+            .enqueue(object : Callback<Void> {
+
+                override fun onResponse(
+                    call: Call<Void>,
+                    response: Response<Void>
+                ) {
+                    if (!isAdded || _binding == null) return
+
+                    if (response.isSuccessful) {
+
+                        Toast.makeText(
+                            requireContext(),
+                            "태그가 삭제되었습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // 선택된 태그에서도 제거
+                        selectedTagNames.remove(tagName)
+                        refreshSelectedTagsUI()
+
+                        // 서버에서 최신 태그 목록 다시 조회
+                        fetchServerTags()
+
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "태그 삭제에 실패했습니다. (${response.code()})",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<Void>,
+                    t: Throwable
+                ) {
+                    if (!isAdded || _binding == null) return
+
+                    Toast.makeText(
+                        requireContext(),
+                        "네트워크 오류가 발생했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     override fun onDestroyView() {

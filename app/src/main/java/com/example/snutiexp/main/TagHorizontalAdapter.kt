@@ -12,9 +12,9 @@ class TagHorizontalAdapter(
     private var items: List<String>,
     private val isSelectedMode: Boolean = false,
     private val selectedChecker: ((String) -> Boolean)? = null,
-    private val onItemClick: (String) -> Unit
+    private val onItemClick: (String) -> Unit,
+    private val onItemLongClick: ((String) -> Unit)? = null
 ) : RecyclerView.Adapter<TagHorizontalAdapter.TagViewHolder>() {
-
     class TagViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTag: TextView = view.findViewById(R.id.tv_item_tag)
     }
@@ -39,6 +39,15 @@ class TagHorizontalAdapter(
 
         holder.itemView.setOnClickListener {
             onItemClick(tagName)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            if (onItemLongClick != null) {
+                onItemLongClick.invoke(tagName)
+                true
+            } else {
+                false
+            }
         }
     }
 
