@@ -23,6 +23,9 @@ class DraftLectureListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var lectureAdapter: LectureAdapter
+
+    // 진행 중인 네트워크 요청 추적용
+    private var draftCall: Call<LectureListResponse>? = null
     
     // 자동 새로고침
     private val courseActivityResultLauncher = registerForActivityResult(
@@ -72,15 +75,22 @@ class DraftLectureListFragment : Fragment() {
 
     // 기존 페이징 응답 객체를 수신하여 드래프트 리스트 뷰를 갱신하는 비동기 네트워크 코어
     private fun loadDraftLecturesFromServer() {
-        if (!binding.swipeRefreshLayout.isRefreshing) {
-            binding.swipeRefreshLayout.isRefreshing = true
+        val currentBinding = _binding ?: return
+        if (!currentBinding.swipeRefreshLayout.isRefreshing) {
+            currentBinding.swipeRefreshLayout.isRefreshing = true
         }
-        RetrofitClient.service.getDraftLectures().enqueue(object : Callback<LectureListResponse> {
+        draftCall?.cancel()
+        draftCall = RetrofitClient.service.getDraftLectures()
+        draftCall?.enqueue(object : Callback<LectureListResponse> {
             override fun onResponse(
                 call: Call<LectureListResponse>,
                 response: Response<LectureListResponse>
             ) {
-                binding.swipeRefreshLayout.isRefreshing = false
+                if (!isAdded || _binding == null) return
+
+                val activeBinding = _binding ?: return
+                activeBinding.swipeRefreshLayout.isRefreshing = false
+
                 if (response.isSuccessful) {
                     // 기존 모델의 content 리스트를 그대로 긁어와 매핑을 수행
                     val draftList = response.body()?.content ?: emptyList()
@@ -88,11 +98,11 @@ class DraftLectureListFragment : Fragment() {
                     Log.d("DRAFT_DEBUG", "서버 응답 성공: 드래프트 강좌 개수 -> ${draftList.size}")
 
                     if (draftList.isEmpty()) {
-                        binding.layoutEmpty.visibility = View.VISIBLE
-                        binding.rvLectures.visibility = View.GONE
+                        activeBinding.layoutEmpty.visibility = View.VISIBLE
+                        activeBinding.rvLectures.visibility = View.GONE
                     } else {
-                        binding.layoutEmpty.visibility = View.GONE
-                        binding.rvLectures.visibility = View.VISIBLE
+                        activeBinding.layoutEmpty.visibility = View.GONE
+                        activeBinding.rvLectures.visibility = View.VISIBLE
                         lectureAdapter.updateList(draftList)
 
                         Toast.makeText(
@@ -103,12 +113,17 @@ class DraftLectureListFragment : Fragment() {
                     }
                 } else {
                     Log.e("DRAFT_DEBUG", "HTTP 실패 코드 수신: ${response.code()}")
-                    Toast.makeText(requireContext(), "드래프트 목록을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    if (response.code() != 401) {
+                        Toast.makeText(requireContext(), "드래프트 목록을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
             override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {
-                binding.swipeRefreshLayout.isRefreshing = false
+                if (call.isCanceled) return
+                if (!isAdded || _binding == null) return
+
+                _binding?.swipeRefreshLayout?.isRefreshing = false
                 Log.e("DRAFT_DEBUG", "네트워크 에러: ${t.message}")
                 Toast.makeText(requireContext(), "네트워크 연결 상태를 확인해 주세요.", Toast.LENGTH_SHORT).show()
             }
@@ -117,6 +132,8 @@ class DraftLectureListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        draftCall?.cancel()
+        draftCall = null
         _binding = null
     }
 }

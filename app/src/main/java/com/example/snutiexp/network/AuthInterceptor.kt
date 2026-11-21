@@ -37,13 +37,15 @@ class AuthInterceptor(private val context: Context) : Interceptor {
         if (response.code == 401) {
             synchronized(this) {
                 val currentToken = sharedPref.getString("access_token", null)
-                if (currentToken != null) {
-                    // 토큰을 완전히 비워줍니다.
-                    sharedPref.edit().clear().apply()
+                if (!currentToken.isNullOrEmpty()) {
+                    // 이동 전에 세션 정보를 확실히 비웁니다.
+                    sharedPref.edit().clear().commit()
 
-                    // 로그인 화면으로 강제 이동 (기존 액티비티 스택을 전부 클리어하여 뒤로 가기로 메인에 다시 못 오게 차단)
+                    // 스택 정리 플래그를 추가해 LoginActivity로 이동합니다.
                     val intent = Intent(context, LoginActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
                     context.startActivity(intent)
                 }

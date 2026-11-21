@@ -29,15 +29,41 @@ class LoginActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("token_prefs", MODE_PRIVATE)
         val token = sharedPref.getString("access_token", null)
 
-        // 저장된 토큰 확인
-        if (!token.isNullOrEmpty()) {
+        // 토큰이 존재하고 아직 만료되지 않았을 때만 자동 로그인으로 메인 진입
+        if (!token.isNullOrEmpty() && !isTokenExpired(token)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
-            return // 아래 UI 초기화 코드 실행 안 함
+            return
+        }
+
+        // 만료된 토큰이 남아있었다면 기존 세션 정보 정리
+        if (!token.isNullOrEmpty()) {
+            sharedPref.edit().clear().apply()
         }
 
         // 토큰이 없을 때만 UI 초기화 진행
         initLoginUI()
+    }
+
+    // JWT Payload의 exp 클레임으로 만료 여부 확인 (파싱 불가 시 보수적으로 만료 처리)
+    private fun isTokenExpired(token: String): Boolean {
+        return try {
+            val parts = token.split(".")
+            if (parts.size < 2) return true
+
+            val decodedBytes = Base64.decode(parts[1], Base64.URL_SAFE or Base64.NO_PADDING)
+            val jsonObject = JSONObject(String(decodedBytes, Charsets.UTF_8))
+
+            if (!jsonObject.has("exp")) return false
+
+            val expSeconds = jsonObject.getLong("exp")
+            val nowSeconds = System.currentTimeMillis() / 1000L
+            // 만료 10초 전부터 만료로 간주해 경계선 오류 방지
+            expSeconds <= (nowSeconds + 10L)
+        } catch (e: Exception) {
+            Log.e("JWT_EXP_ERROR", "토큰 만료 확인 중 오류: ${e.message}")
+            true
+        }
     }
 
     private fun initLoginUI() {

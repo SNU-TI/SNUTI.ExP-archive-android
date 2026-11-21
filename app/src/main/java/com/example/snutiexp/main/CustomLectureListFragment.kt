@@ -113,7 +113,7 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
 
                                                 if (response.isSuccessful) {
                                                     Toast.makeText(requireContext(), "강좌가 저장되었습니다.", Toast.LENGTH_SHORT).show()
-                                                } else {
+                                                } else if (response.code() != 401) {
                                                     Toast.makeText(requireContext(), "저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
                                                 }
                                             }
@@ -183,11 +183,17 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
                     tagPreviewAdapter.setSelectedTagId(selectedTagId)
 
                     fetchCustomLectures(myTags)
+                } else {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                    if (response.code() != 401) {
+                        Toast.makeText(requireContext(), "관심 태그를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
                 if (call.isCanceled) return
                 if (!isAdded || _binding == null) return
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         })
     }
@@ -219,6 +225,8 @@ class CustomLectureListFragment : Fragment(R.layout.fragment_custom_lecture_list
 
                     // 필터 적용 및 목록 갱신
                     applyFilters()
+                } else if (response.code() != 401) {
+                    Toast.makeText(requireContext(), "강좌 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
             override fun onFailure(call: Call<LectureListResponse>, t: Throwable) {

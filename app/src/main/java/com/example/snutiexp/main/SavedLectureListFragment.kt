@@ -154,7 +154,9 @@ class SavedLectureListFragment : Fragment() {
                     applyFilters()
                 } else {
                     Log.e("API_ERROR", "저장된 강좌 로드 실패: ${response.code()}")
-                    Toast.makeText(requireContext(), "저장된 강좌를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    if (response.code() != 401) {
+                        Toast.makeText(requireContext(), "저장된 강좌를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 

@@ -264,7 +264,9 @@ class MainLectureListFragment : Fragment() {
                     } else {
                         Log.e("API_ERROR", "Status Code: ${response.code()}")
                         Log.e("API_ERROR", "Error Body: ${response.errorBody()?.string()}")
-                        Toast.makeText(requireContext(), "강좌 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        if (response.code() != 401) {
+                            Toast.makeText(requireContext(), "강좌 목록을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
 

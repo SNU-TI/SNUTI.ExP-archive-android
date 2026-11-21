@@ -31,6 +31,8 @@ class InfoInputFragment : Fragment() {
     // 사용자가 현재 선택/추가한 태그 이름 목록 (중복 방지 및 순서 유지)
     private val selectedTagNames = mutableSetOf<String>()
 
+    private var tagCall: Call<List<TagResponse>>? = null
+
     private lateinit var selectedAdapter: TagHorizontalAdapter
     private lateinit var recommendedAdapter: TagHorizontalAdapter
 
@@ -150,8 +152,12 @@ class InfoInputFragment : Fragment() {
 
     // 서버로부터 전체 태그 목록을 불러오는 함수
     private fun fetchServerTags() {
-        RetrofitClient.service.getTags().enqueue(object : Callback<List<TagResponse>> {
+        tagCall?.cancel()
+        tagCall = RetrofitClient.service.getTags()
+        tagCall?.enqueue(object : Callback<List<TagResponse>> {
             override fun onResponse(call: Call<List<TagResponse>>, response: Response<List<TagResponse>>) {
+                if (!isAdded || _binding == null) return
+
                 if (response.isSuccessful && response.body() != null) {
                     allRecommendedTags.clear()
                     allRecommendedTags.addAll(response.body()!!)
@@ -159,7 +165,8 @@ class InfoInputFragment : Fragment() {
                 }
             }
             override fun onFailure(call: Call<List<TagResponse>>, t: Throwable) {
-                // 네트워크 오류 시 조용히 처리하거나 토스트
+                if (call.isCanceled) return
+                if (!isAdded || _binding == null) return
             }
         })
     }
@@ -171,6 +178,9 @@ class InfoInputFragment : Fragment() {
 
     // 태그 목록 (전체)
     private fun refreshRecommendedTagsUI() {
+        val currentBinding = _binding ?: return
+        if (!isAdded) return
+
         val keyword = binding.etTagSearch.text.toString().trim()
         val filtered = if (keyword.isEmpty()) {
             allRecommendedTags.map { it.name }
@@ -364,6 +374,8 @@ class InfoInputFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        tagCall?.cancel()
+        tagCall = null
         _binding = null
     }
 }
