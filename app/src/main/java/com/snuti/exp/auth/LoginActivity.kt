@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.snuti.exp.databinding.ActivityLoginBinding
@@ -20,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
 
     private var isAutoLoginChecked = true
+    private var loginCall: Call<LoginResponse>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,9 +67,21 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun setLoadingState(isLoading: Boolean) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+        val isInteractive = !isLoading
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.btnLogin.isEnabled = isInteractive
+        binding.etLoginId.isEnabled = isInteractive
+        binding.etLoginPw.isEnabled = isInteractive
+        binding.tvFindPassword.isEnabled = isInteractive
+        binding.btnGoSignup.isEnabled = isInteractive
+    }
+
     private fun initLoginUI() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setLoadingState(false)
 
         // [비밀번호 찾기] 버튼 기능 추가
         binding.tvFindPassword.setOnClickListener {
@@ -87,7 +101,7 @@ class LoginActivity : AppCompatActivity() {
 
         // [로그인] 버튼 기능
         binding.btnLogin.setOnClickListener {
-            val email = binding.etLoginId.text.toString()
+            val email = binding.etLoginId.text.toString().trim()
             val password = binding.etLoginPw.text.toString()
 
             // 빈 칸 체크
@@ -96,59 +110,73 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // 이전 요청 취소 후 새 로그인 요청 시작 및 로딩 화면 표시
+            loginCall?.cancel()
+            setLoadingState(true)
+
             // 서버에 로그인 요청 전송
             val loginRequest = LoginRequest(email, password)
-            RetrofitClient.authService.login(loginRequest).enqueue(object :
-                Callback<LoginResponse> {
+            loginCall = RetrofitClient.authService.login(loginRequest)
+            loginCall?.enqueue(object : Callback<LoginResponse> {
                 override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                    if (response.isSuccessful) {
-                        val loginResponse = response.body()
-                        val token = loginResponse?.accessToken
+                    if (call.isCanceled || isFinishing || isDestroyed) return
 
-                        val sharedPref = getSharedPreferences("token_prefs", MODE_PRIVATE)
-                        if (!token.isNullOrEmpty()) {
-                            // JWT 토큰 페이로드 파싱 및 관리자 플래그 기포팅 저장
-                            val isAdmin = checkIsAdminFromJwt(token)
+                    // 중복 선언 제거 및 응답 상태 일원화
+                    val token = if (response.isSuccessful) response.body()?.accessToken else null
+                    if (response.isSuccessful && !token.isNullOrEmpty()) {
+                        val isAdmin = checkIsAdminFromJwt(token)
+                        val prefs = getSharedPreferences("token_prefs", MODE_PRIVATE)
+                        with(prefs.edit()) {
+                            putString("access_token", token)
+                            putBoolean("is_admin_user", isAdmin)
 
-                            val sharedPref = getSharedPreferences("token_prefs", MODE_PRIVATE)
-                            with(sharedPref.edit()) {
-                                putString("access_token", token)
-                                putBoolean("is_admin_user", isAdmin)
-
-                                // 체크박스 상태에 따른 아이디 저장 로직
-                                if (isAutoLoginChecked) {
-                                    putString("saved_id", email)
-                                } else {
-                                    remove("saved_id")
-                                }
-                                apply() // 비동기로 데이터 저장
+                            // 체크박스 상태에 따른 아이디 저장 로직
+                            if (isAutoLoginChecked) {
+                                putString("saved_id", email)
+                            } else {
+                                remove("saved_id")
                             }
+                            apply() // 비동기로 데이터 저장
+                        }
 
-                            Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        } else {
-                            // 토큰 필드가 비어있거나 없는 경우
-                            Toast.makeText(this@LoginActivity, "인증 토큰을 받지 못했습니다.", Toast.LENGTH_SHORT).show()
-                        }
+                        Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()
                     } else {
-                        // 로그인 실패 (비밀번호 틀림, 존재하지 않는 계정 등) : 400, 401, 404 등 HTTP 에러 응답 처리
-                        val errorBody = response.errorBody()?.string() ?: ""
-                        val errorMessage = when {
-                            errorBody.contains("not found") -> "존재하지 않는 계정입니다."
-                            errorBody.contains("password") -> "비밀번호가 올바르지 않습니다."
-                            else -> "로그인 정보가 올바르지 않습니다."
+                        // 로그인 실패 또는 토큰 누락 시 로딩 종료 및 안내 메시지 표시
+                        setLoadingState(false)
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@LoginActivity, "인증 토큰을 받지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // 로그인 실패 (비밀번호 틀림, 존재하지 않는 계정 등) : 400, 401, 404 등 HTTP 에러 응답 처리
+                            val errorBody = response.errorBody()?.string() ?: ""
+                            val errorMessage = when {
+                                errorBody.contains("not found") -> "존재하지 않는 계정입니다."
+                                errorBody.contains("password") -> "비밀번호가 올바르지 않습니다."
+                                else -> "로그인 정보가 올바르지 않습니다."
+                            }
+                            Toast.makeText(this@LoginActivity, errorMessage, Toast.LENGTH_SHORT).show()
                         }
-                        Toast.makeText(this@LoginActivity, errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                    if (call.isCanceled || isFinishing || isDestroyed) return // 취소되거나 종료된 화면의 콜백 무시
+
+                    setLoadingState(false) // 네트워크 실패 시 로딩 종료
+                    Log.e("LOGIN_ERROR", "로그인 요청 실패: ${t.message}")
                     Toast.makeText(this@LoginActivity, "서버 연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             })
         }
+    }
+
+    // 화면 종료 시 진행 중인 로그인 요청 정리
+    override fun onDestroy() {
+        super.onDestroy()
+        loginCall?.cancel()
+        loginCall = null
     }
 
     // 화면이 다시 보일 때 저장된 아이디 불러오기
