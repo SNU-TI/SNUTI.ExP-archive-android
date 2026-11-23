@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.snutiexp"
+    namespace = "com.snuti.exp"
     compileSdk = 36
 
     buildFeatures {
@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.snutiexp"
+        applicationId = "com.snuti.exp"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
