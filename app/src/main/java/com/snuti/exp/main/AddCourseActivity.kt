@@ -194,25 +194,7 @@ class AddCourseActivity : AppCompatActivity() {
         checkPermissionAndUpload()
     }
     private fun checkPermissionAndUpload() {
-        val permission =
-            if (android.os.Build.VERSION.SDK_INT >=
-                android.os.Build.VERSION_CODES.TIRAMISU
-            ) {
-                android.Manifest.permission.READ_MEDIA_IMAGES
-            } else {
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            }
-
-        if (
-            ContextCompat.checkSelfPermission(
-                this,
-                permission
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            startFullUploadAfterPermission()
-        } else {
-            requestPermissionLauncher.launch(permission)
-        }
+        startFullUploadAfterPermission()
     }
 
     private fun startFullUploadAfterPermission() {
